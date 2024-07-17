@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+
+            h3 {
+                border-bottom: 1px solid #ccc;
+            }
+
+            .sha, .uid {
+                font-family: monospace;
+            }
+
+            .icon {
+                width: 48px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Psion Software Index</h1>
+
+        <h2>Summary</h2>
+        <table>
+            <tr>
+                <td>{{ summary.installer_count }}</td>
+                <td>Installers</td>
+            </tr>
+            <tr>
+                <td>{{ summary.uid_count }}</td>
+                <td>Unique UIDs</td>
+            </tr>
+            <tr>
+                <td>{{ summary.version_count }}</td>
+                <td> Unique versions</td>
+            </tr>
+            <tr>
+                <td>{{ summary.sha_count }}</td>
+                <td>Unique files</td>
+            </tr>
+        </table>
+
+        <h2>Software</h2>
+
+        {% for application in applications %}
+
+            <h3>{{ application.name }}</h3>
+            <div class="uid">{{ "0x%08x" % application.uid }}</div>
+
+            <table>
+                {% for version in application.versions %}{% for installer in version.installers %}
+                    <tr>
+                        <td>{{ installer.version }}</td>
+                        <td class="icon">
+                            {% if installer.icon_data %}
+                                <img src="{{ installer.icon_data }}">
+                            {% endif %}
+                        </td>
+                        <td>{{ installer.language_emoji }}</td>
+                        <td class="sha">{{ installer.sha256 }}</td>
+                        <td>{{ installer.path }}</td>
+                    </tr>
+                {% endfor %}{% endfor %}
+            </table>
+
+        {% endfor %}
+
+    </body>
+</html>

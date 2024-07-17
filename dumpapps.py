@@ -2,6 +2,7 @@
 
 import argparse
 import array
+import base64
 import collections
 import contextlib
 import csv
@@ -9,17 +10,30 @@ import glob
 import hashlib
 import json
 import os
+import re
 import subprocess
 import tempfile
+
+import jinja2
+
+ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 
 
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
 # being to allow us to make progress with some of the existing libraries.
 IGNORED = set([
+    "ebc.sis",
     "jCompilePsion.sis",
     "jRunPsion.sis",
     "MrMattGames1.sis",
     "SCOMMSW.SIS",
+    "enotem.SIS",  # Unknown compression scheme 3
+    "eplaym.SIS",  # Unknown compression scheme 3
+    "ER5.SIS",
+    "MSGSUITE.SIS",
+    "netutils.sis",
+    "Hol5.SIS",
 ])
 
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
@@ -51,13 +65,48 @@ LANGUAGE_EMOJI = {
 }
 
 
+class Summary(object):
+
+    def __init__(self, installer_count, uid_count, version_count, sha_count):
+        self.installer_count = installer_count
+        self.uid_count = uid_count
+        self.version_count = version_count
+        self.sha_count = sha_count
+
+
+class Version(object):
+
+    def __init__(self, installers):
+        self.installers = installers
+
+    @property
+    def version(self):
+        return self.installers[0].version
+
+
+class Application(object):
+
+    def __init__(self, uid, installers):
+        self.uid = uid
+        self.installers = installers
+        versions = collections.defaultdict(list)
+        for installer in installers:
+            versions[installer.version].append(installer)
+        self.versions = sorted([Version(installers=installers) for installers in versions.values()], key=lambda x: x.version)
+
+    @property
+    def name(self):
+        return self.installers[0].name
+
+
 class Installer(object):
 
-    def __init__(self, library_path, path, details, sha256):
+    def __init__(self, library_path, path, details, sha256, icon_data):
         self.library_path = library_path
         self.path = path
         self._details = details
         self.sha256 = sha256
+        self.icon_data = icon_data
 
     @property
     def uid(self):
@@ -158,15 +207,34 @@ def import_library(path):
             if info is None:
                 continue
 
+            icon_data = None
             with tempfile.TemporaryDirectory() as temporary_directory_path:
                 with contextlib.chdir(temporary_directory_path):
                     dumpsis_extract(file_path, temporary_directory_path)
                     contents = glob.glob("**/*.aif", recursive=True)
                     if contents:
-                        subprocess.check_call(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", contents[0]])
-                    print(contents)
+                        aif_path = contents[0]
+                        subprocess.check_call(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", aif_path])
+                        aif_basename = os.path.basename(aif_path)
+                        aif_dirname = os.path.dirname(aif_path)
+                        icon_candidates = os.listdir(aif_dirname)
+                        print(icon_candidates)
+                        for candidate in icon_candidates:
+                            match = re.match("^" + aif_basename + r"_(\d)_(\d+)x(\d+)_(\d)bpp.bmp$", candidate)
+                            if match:
+                                index = match.group(1)
+                                width = int(match.group(2))
+                                height = int(match.group(3))
+                                bpp = int(match.group(4))
+                                asset_path = os.path.join(aif_dirname, candidate)
+                                if width != 48 or height != 48:
+                                    continue
+                                print(asset_path, index, width, height, bpp)
+                                with open(asset_path, 'rb') as fh:
+                                    icon_data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
+                                break
 
-            installer = Installer(path, rel_path, info, shasum(file_path))
+            installer = Installer(path, rel_path, info, shasum(file_path), icon_data)
             installers.append(installer)
 
     return installers
@@ -177,6 +245,10 @@ def main():
     parser.add_argument("path", nargs="+")
     options = parser.parse_args()
 
+
+    loader = jinja2.FileSystemLoader(TEMPLATES_DIRECTORY)
+    environment = jinja2.Environment(loader=loader)
+    template = environment.get_template("index.html")
 
     paths = [os.path.abspath(path) for path in options.path]
     installers = []
@@ -198,56 +270,17 @@ def main():
         details[(installer.uid, installer.sha256, installer.version)].append(installer)
         groups[(installer.uid)].append(installer)
 
-    with open('output.html', 'w') as fh:
-        fh.write("""<!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <style>
-                    .sha, .uid {
-                        font-family: monospace;
-                    }
-                </style>
-            </head>
-            <body>
-            """)
+    summary = Summary(installer_count=total_count,
+                      uid_count=len(unique_uids),
+                      version_count=len(unique_versions),
+                      sha_count=len(unique_shas))
 
-        for uid, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
-            fh.write(f"<h1>{installers[0].name}</h1>")
-            fh.write(f"<div class=\"uid\">{"0x%08x" % uid}</div>")
-            fh.write("<table>")
+    applications = []
+    for uid, installers in sorted([item for item in groups.items()],                                        key=lambda x: x[1][0].name.lower()):
+        applications.append(Application(uid, installers))
 
-            unique_shas = collections.defaultdict(list)
-            for installer in installers:
-                unique_shas[installer.sha256].append(installer)
-
-            shas_sorted_by_version = sorted([sha for sha in unique_shas.keys()], key=lambda x: unique_shas[x][0].version)
-
-            for sha in shas_sorted_by_version:
-                duplicate_installers = unique_shas[sha]
-                installer = duplicate_installers[0]
-
-                all_paths = ", ".join([i.path for i in duplicate_installers])
-
-                fh.write("<tr>")
-                fh.write(f"<td>{installer.version}</td>")
-                fh.write(f"<td>{installer.language_emoji}</td>")
-                fh.write(f"<td class=\"sha\">{installer.sha256}</td>")
-                fh.write("<td>")
-                fh.write("<ul>")
-                for i in duplicate_installers:
-                    fh.write(f"<li>{i.path}</li>")
-                fh.write("</ul>")
-                fh.write("</td>")
-                fh.write("</tr>")
-            fh.write("</table>")
-
-        fh.write("""</body>
-            </html>
-            """)
-
-    print(f"{total_count} valid sis files; {len(unique_uids)} unique uids; {len(unique_versions)} unique versions'; {len(unique_shas)} unique files")
-
+    with open("index.html", "w") as fh:
+        fh.write(template.render(summary=summary, applications=applications))
 
 
 if __name__ == "__main__":
