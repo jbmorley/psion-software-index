@@ -1,0 +1,49 @@
+body {
+    background-color: #eee
+}
+
+h3 {
+    border-bottom: 1px solid #ccc;
+}
+
+.sha, .uid {
+    font-family: monospace;
+}
+
+.icon {
+    width: 48px;
+}
+
+ul.applications {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    margin: 1rem;
+}
+
+ul.applications > li {
+    border: 1px solid #eee;
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: #fff;
+}
+
+.application-header {
+    border-bottom: 1px solid #eee;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: baseline;
+}
+
+.application-name {
+    font-size: 1.6rem;
+}
+
+.application-identifier {
+    text-align: right;
+    font-family: monospace;
+    color: #ccc;
+}

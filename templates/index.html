@@ -1,20 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <style>
-
-            h3 {
-                border-bottom: 1px solid #ccc;
-            }
-
-            .sha, .uid {
-                font-family: monospace;
-            }
-
-            .icon {
-                width: 48px;
-            }
-        </style>
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
         <h1>Psion Software Index</h1>
@@ -41,28 +28,35 @@
 
         <h2>Software</h2>
 
-        {% for application in applications %}
-
-            <h3>{{ application.name }}</h3>
-            <div class="uid">{{ "0x%08x" % application.uid }}</div>
-
-            <table>
-                {% for version in application.versions %}{% for installer in version.installers %}
-                    <tr>
-                        <td>{{ installer.version }}</td>
-                        <td class="icon">
-                            {% if installer.icon_data %}
-                                <img src="{{ installer.icon_data }}">
-                            {% endif %}
-                        </td>
-                        <td>{{ installer.language_emoji }}</td>
-                        <td class="sha">{{ installer.sha256 }}</td>
-                        <td>{{ installer.path }}</td>
-                    </tr>
-                {% endfor %}{% endfor %}
-            </table>
-
-        {% endfor %}
+        <ul class="applications">
+            {% for application in applications %}
+                <li>
+                    <div class="application-header">
+                        <div class="application-name">
+                            {{ application.name }}
+                        </div>
+                        <div class="application-identifier">
+                            {{ "0x%08x" % application.uid }}
+                        </div>
+                    </div>
+                    {% for version in application.versions %}
+                        <h4>{{ version.version }}</h4>
+                        <ul>
+                            {% for installer in version.installers %}
+                                <li>
+                                    {% if installer.icon_data %}
+                                        <img src="{{ installer.icon_data }}">
+                                    {% endif %}
+                                    {{ installer.language_emoji }}
+                                    {{ installer.sha256 }}
+                                    {{ installer.path }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
 
     </body>
 </html>

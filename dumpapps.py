@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 
@@ -18,6 +19,7 @@ import jinja2
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
+BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "build")
 
 
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
@@ -153,8 +155,8 @@ def dumpsis_extract(source, destination):
     result = subprocess.run(["lua", "/Users/jbmorley/Projects/opolua/src/dumpsis.lua", source, destination], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('cp1252', 'ignore')
-    stderr = result.stderr.decode('cp1252', 'ignore')
+    stdout = result.stdout.decode('utf-8')
+    stderr = result.stderr.decode('utf-8')
 
     if "Illegal byte sequence" in stdout + stderr:
         return None
@@ -245,7 +247,6 @@ def main():
     parser.add_argument("path", nargs="+")
     options = parser.parse_args()
 
-
     loader = jinja2.FileSystemLoader(TEMPLATES_DIRECTORY)
     environment = jinja2.Environment(loader=loader)
     template = environment.get_template("index.html")
@@ -279,7 +280,15 @@ def main():
     for uid, installers in sorted([item for item in groups.items()],                                        key=lambda x: x[1][0].name.lower()):
         applications.append(Application(uid, installers))
 
-    with open("index.html", "w") as fh:
+    if os.path.exists(BUILD_DIRECTORY):
+        shutil.rmtree(BUILD_DIRECTORY)
+
+    os.mkdir(BUILD_DIRECTORY)
+
+    shutil.copyfile(os.path.join(ROOT_DIRECTORY, "css", "main.css"),
+                    os.path.join(BUILD_DIRECTORY, "main.css"))
+
+    with open(os.path.join(BUILD_DIRECTORY, "index.html"), "w") as fh:
         fh.write(template.render(summary=summary, applications=applications))
 
 
