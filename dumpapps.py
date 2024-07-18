@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import uuid
 
 import jinja2
 import yaml
@@ -38,6 +39,8 @@ IGNORED = set([
     "MSGSUITE.SIS",
     "netutils.sis",
     "Hol5.SIS",
+    "MP4E_E3.SIS", # MondoPondo!
+    "nEzumi 2.sis",
 ])
 
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
@@ -115,13 +118,19 @@ def decode(s, encodings=('ascii', 'utf8', 'latin1', 'cp1252')):
     raise UnicodeDecodeError("Unknown encoding")
 
 
-def readme_for(path):
+def find_sibling(path, name):
     directory_path = os.path.dirname(path)
     files = os.listdir(directory_path)
     for f in files:
-        if f.lower() == "readme.txt":
-            with open(os.path.join(directory_path, f), "rb") as fh:
-                return decode(fh.read())
+        if f.lower() == name.lower():
+            return os.path.join(directory_path, f)
+
+
+def readme_for(path):
+    readme_path = find_sibling(path, "readme.txt")
+    if readme_path:
+        with open(readme_path, "rb") as fh:
+            return decode(fh.read())
 
 
 class DummyMetadataProvider(object):
@@ -209,10 +218,11 @@ class Installer(object):
         self.sha256 = sha256
         self.icons = icons
         self.readme = readme_for(os.path.join(library.path, path))
+        self.uuid = str(uuid.uuid4())
 
     @property
     def uid(self):
-        return self._details["uid"]
+        return "0x%08x" % self._details["uid"]
 
     @property
     def version(self):
@@ -225,6 +235,45 @@ class Installer(object):
     @property
     def language_emoji(self):
         return "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
+
+    @property
+    def full_path(self):
+        return os.path.join(self.library.path, self.path)
+
+    @property
+    def summary(self):
+        return self.library.summary_for(self.path)
+
+    @property
+    def icon(self):
+        return select_icon(self.icons)
+
+
+class App(object):
+
+    def __init__(self, library, path, identifier, sha256, icons):
+        self.library = library
+        self.path = path
+        self.identifier = identifier
+        self.sha256 = sha256
+        self.icons = icons
+        self.readme = readme_for(os.path.join(library.path, path))
+
+    @property
+    def uid(self):
+        return self.identifier
+
+    @property
+    def version(self):
+        return "Unknown Version"
+
+    @property
+    def name(self):
+        return os.path.basename(self.path)
+
+    @property
+    def language_emoji(self):
+        return "Unknown Language"
 
     @property
     def full_path(self):
@@ -335,10 +384,10 @@ def import_library(library):
         for file_path in file_paths:
             basename = os.path.basename(file_path)
             ext = os.path.splitext(file_path)[1].lower()
-            if ext != ".sis" or basename in IGNORED:
+            if ext != ".sis" or basename in IGNORED or "System/Install" in file_path:
                 continue
             rel_path = os.path.relpath(file_path, library.path)
-            print(f"Importing '{rel_path}'...")
+            print(f"Importing installer '{rel_path}'...")
             info = dumpsis(file_path)
             if info is None:
                 continue
@@ -356,6 +405,37 @@ def import_library(library):
             installers.append(installer)
 
     return installers
+
+
+def import_apps(library):
+    apps = []
+
+    print(f"Importing library '{library.path}'...")
+    for root, dirs, files in os.walk(library.path):
+        file_paths = [os.path.join(root, f) for f in files]
+        for file_path in file_paths:
+            basename = os.path.basename(file_path)
+            name, ext = os.path.splitext(basename)
+            if ext.lower() != ".app" or basename in IGNORED:
+                continue
+            rel_path = os.path.relpath(file_path, library.path)
+            print(f"Importing app '{rel_path}'...")
+            aif_path = find_sibling(file_path, name + ".aif")
+            uid = str(uuid.uuid4())
+            icons = []
+            if aif_path:
+                uid = get_uid(aif_path)
+                icons = get_icons(aif_path)
+
+            installer = App(library, rel_path, uid, shasum(file_path), icons)
+            apps.append(installer)
+
+    return apps
+
+
+def get_uid(aif_path):
+    output = subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", aif_path]).decode('utf-8', 'ignore')
+    return output.split()[1]
 
 
 def get_icons(aif_path):
@@ -407,6 +487,7 @@ def main():
                           metadata_provider=metadata_provider)
         libraries.append(library)
         installers += import_library(library)
+        installers += import_apps(library)
 
     unique_uids = set()
     unique_versions = set()
@@ -429,7 +510,7 @@ def main():
                       sha_count=len(unique_shas))
 
     applications = []
-    for uid, installers in sorted([item for item in groups.items()],                                        key=lambda x: x[1][0].name.lower()):
+    for uid, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
         applications.append(Application(uid, installers))
 
     if os.path.exists(BUILD_DIRECTORY):

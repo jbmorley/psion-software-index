@@ -49,7 +49,7 @@
                             {{ application.name }}
                         </div>
                         <div class="application-identifier">
-                            {{ "0x%08x" % application.uid }}
+                            {{ application.uid }}
                         </div>
                     </div>
                     {% if application.summary %}
@@ -84,7 +84,7 @@
                                         <div class="path">
                                             <ul>
                                                 {% for installer in variant.installers %}
-                                                    <li>[{{ installer.library.name }}]{{ installer.path }}</li>
+                                                    <li>[{{ installer.library.name }}]/{{ installer.path }}</li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
