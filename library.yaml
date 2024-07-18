@@ -1,5 +1,9 @@
 - path: /Volumes/3LIBJUNE05
   name: 3-Lib June '05
   metadata_provider: LibraryMetadataProvider
+- path: /Users/jbmorley/Software/Psion/Libraries/PSION CD Vol 1
+  name: PSION CD Vol 1
 - path: /Users/jbmorley/Software/Psion/Libraries/PSION CD Vol 2
   name: PSION CD Vol 2
+- path: /Volumes/PSIONKIT
+  name: PSION World Online

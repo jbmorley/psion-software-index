@@ -61,6 +61,11 @@ ul.applications > li {
     margin-bottom: 1rem;
 }
 
+.readme {
+    white-space: pre;
+    font-family: monospace;
+}
+
 .version-header {
     display: grid;
     grid-template-columns: 1fr 1fr;

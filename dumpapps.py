@@ -106,6 +106,24 @@ class LibraryMetadataProvider(object):
         return None
 
 
+def decode(s, encodings=('ascii', 'utf8', 'latin1', 'cp1252')):
+    for encoding in encodings:
+        try:
+            return s.decode(encoding)
+        except UnicodeDecodeError:
+            pass
+    raise UnicodeDecodeError("Unknown encoding")
+
+
+def readme_for(path):
+    directory_path = os.path.dirname(path)
+    files = os.listdir(directory_path)
+    for f in files:
+        if f.lower() == "readme.txt":
+            with open(os.path.join(directory_path, f), "rb") as fh:
+                return decode(fh.read())
+
+
 class DummyMetadataProvider(object):
 
     def summary_for(self, path):
@@ -171,6 +189,12 @@ class Application(object):
         return self.installers[0].summary
 
     @property
+    def readme(self):
+        for installer in self.installers:
+            if installer.readme is not None:
+                return installer.readme
+
+    @property
     def icon(self):
         return select_icon([installer.icon for installer in self.installers
                             if installer.icon])
@@ -184,6 +208,7 @@ class Installer(object):
         self._details = details
         self.sha256 = sha256
         self.icons = icons
+        self.readme = readme_for(os.path.join(library.path, path))
 
     @property
     def uid(self):
@@ -374,8 +399,8 @@ def main():
     installers = []
     for source in definition:
         metadata_provider = DummyMetadataProvider()
-        if "metadata_provider" in definition:
-            metadata_provider_class = definition["metadata_provider"]
+        if "metadata_provider" in source:
+            metadata_provider_class = source["metadata_provider"]
             metadata_provider = globals()[metadata_provider_class](path=source["path"])
         library = Library(path=source["path"],
                           name=source["name"],
