@@ -69,7 +69,9 @@
                                 {{ version.version }}
                             </div>
                             <div class="version-details">
-                                {{ version.installers | count }} installers, {{ version.variants | count }} variants
+                                {% if version.variants | length > 1 %}
+                                    {{ version.variants | count }} variants
+                                {% endif %}
                             </div>
                         </div>
                         <ul>
