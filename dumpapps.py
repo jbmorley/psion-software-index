@@ -16,6 +16,8 @@ import subprocess
 import tempfile
 
 import jinja2
+import yaml
+
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
@@ -67,6 +69,13 @@ LANGUAGE_EMOJI = {
 }
 
 
+class Library(object):
+
+    def __init__(self, path, name):
+        self.path = path
+        self.name = name
+
+
 class Summary(object):
 
     def __init__(self, installer_count, uid_count, version_count, sha_count):
@@ -80,6 +89,7 @@ class Version(object):
 
     def __init__(self, installers):
         self.installers = installers
+        self.variants = group_collections(installers, lambda x: x.sha256)
 
     @property
     def version(self):
@@ -103,8 +113,8 @@ class Application(object):
 
 class Installer(object):
 
-    def __init__(self, library_path, path, details, sha256, icon_data):
-        self.library_path = library_path
+    def __init__(self, library, path, details, sha256, icon_data):
+        self.library = library
         self.path = path
         self._details = details
         self.sha256 = sha256
@@ -125,6 +135,24 @@ class Installer(object):
     @property
     def language_emoji(self):
         return "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
+
+    @property
+    def full_path(self):
+        return os.path.join(self.library.path, self.path)
+
+
+class Collection(object):
+
+    def __init__(self, identifier, installers):
+        self.identifier = identifier
+        self.installers = installers
+
+
+def group_collections(installers, group_by):
+    groups = collections.defaultdict(list)
+    for installer in installers:
+        groups[group_by(installer)].append(installer)
+    return [Collection(identifier, installers) for identifier, installers in groups.items()]
 
 
 def dumpsis(path):
@@ -192,18 +220,18 @@ def shasum(path):
     return sha256.hexdigest()
 
 
-def import_library(path):
+def import_library(library):
     installers = []
 
-    print(f"Importing library '{path}'...")
-    for root, dirs, files in os.walk(path):
+    print(f"Importing library '{library.path}'...")
+    for root, dirs, files in os.walk(library.path):
         file_paths = [os.path.join(root, f) for f in files]
         for file_path in file_paths:
             basename = os.path.basename(file_path)
             ext = os.path.splitext(file_path)[1].lower()
             if ext != ".sis" or basename in IGNORED:
                 continue
-            rel_path = os.path.relpath(file_path, path)
+            rel_path = os.path.relpath(file_path, library.path)
             print(f"Importing '{rel_path}'...")
             info = dumpsis(file_path)
             if info is None:
@@ -216,11 +244,10 @@ def import_library(path):
                     contents = glob.glob("**/*.aif", recursive=True)
                     if contents:
                         aif_path = contents[0]
-                        subprocess.check_call(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", aif_path])
+                        subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", aif_path])
                         aif_basename = os.path.basename(aif_path)
                         aif_dirname = os.path.dirname(aif_path)
                         icon_candidates = os.listdir(aif_dirname)
-                        print(icon_candidates)
                         for candidate in icon_candidates:
                             match = re.match("^" + aif_basename + r"_(\d)_(\d+)x(\d+)_(\d)bpp.bmp$", candidate)
                             if match:
@@ -231,12 +258,12 @@ def import_library(path):
                                 asset_path = os.path.join(aif_dirname, candidate)
                                 if width != 48 or height != 48:
                                     continue
-                                print(asset_path, index, width, height, bpp)
                                 with open(asset_path, 'rb') as fh:
                                     icon_data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
                                 break
 
-            installer = Installer(path, rel_path, info, shasum(file_path), icon_data)
+            installer = Installer(library, rel_path, info, shasum(file_path), icon_data)
+
             installers.append(installer)
 
     return installers
@@ -244,17 +271,22 @@ def import_library(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("path", nargs="+")
+    parser.add_argument("definition")
     options = parser.parse_args()
+
+    with open(options.definition) as fh:
+        definition = yaml.safe_load(fh)
 
     loader = jinja2.FileSystemLoader(TEMPLATES_DIRECTORY)
     environment = jinja2.Environment(loader=loader)
     template = environment.get_template("index.html")
 
-    paths = [os.path.abspath(path) for path in options.path]
+    libraries = []
     installers = []
-    for path in paths:
-        installers += import_library(path)
+    for source in definition:
+        library = Library(path=source["path"], name=source["name"])
+        libraries.append(library)
+        installers += import_library(library)
 
     unique_uids = set()
     unique_versions = set()
@@ -289,7 +321,9 @@ def main():
                     os.path.join(BUILD_DIRECTORY, "main.css"))
 
     with open(os.path.join(BUILD_DIRECTORY, "index.html"), "w") as fh:
-        fh.write(template.render(summary=summary, applications=applications))
+        fh.write(template.render(libraries=libraries,
+                                 summary=summary,
+                                 applications=applications))
 
 
 if __name__ == "__main__":

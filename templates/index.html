@@ -6,6 +6,14 @@
     <body>
         <h1>Psion Software Index</h1>
 
+        <h2>Libraries</h2>
+
+        <ul>
+            {% for library in libraries %}
+                <li>{{ library.name }} &endash; {{ library.path }}</li>
+            {% endfor %}
+        </ul>
+
         <h2>Summary</h2>
         <table>
             <tr>
@@ -40,16 +48,34 @@
                         </div>
                     </div>
                     {% for version in application.versions %}
-                        <h4>{{ version.version }}</h4>
+                        <div class="version-header">
+                            <div class="version-name">
+                                {{ version.version }}
+                            </div>
+                            <div class="version-details">
+                                {{ version.installers | count }} installers, {{ version.variants | count }} variants
+                            </div>
+                        </div>
                         <ul>
-                            {% for installer in version.installers %}
+                            {% for variant in version.variants %}
                                 <li>
-                                    {% if installer.icon_data %}
-                                        <img src="{{ installer.icon_data }}">
-                                    {% endif %}
-                                    {{ installer.language_emoji }}
-                                    {{ installer.sha256 }}
-                                    {{ installer.path }}
+                                    <div class="release">
+                                        <div class="icon">
+                                            {% if variant.installers[0].icon_data %}
+                                                <img src="{{ variant.installers[0].icon_data }}">
+                                            {% endif %}
+                                        </div>
+                                        <div class="language">
+                                            {{ variant.installers[0].language_emoji }}
+                                        </div>
+                                        <div class="path">
+                                            <ul>
+                                                {% for installer in variant.installers %}
+                                                    <li>{{ installer.library.name }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>

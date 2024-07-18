@@ -36,6 +36,7 @@ ul.applications > li {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: baseline;
+    margin-bottom: 0.5rem;
 }
 
 .application-name {
@@ -46,4 +47,22 @@ ul.applications > li {
     text-align: right;
     font-family: monospace;
     color: #ccc;
+}
+
+.version-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: baseline;
+}
+
+.version-name {
+    font-size: 1.2rem;
+}
+
+.version-details {
+    text-align: right;
+}
+
+.release .path {
+    font-family: monospace;
 }
