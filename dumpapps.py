@@ -265,8 +265,8 @@ def dumpsis(path):
     result = subprocess.run(["lua", "/Users/jbmorley/Projects/opolua/src/dumpsis.lua", "--json", path], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('cp1252', 'ignore')
-    stderr = result.stderr.decode('cp1252', 'ignore')
+    stdout = result.stdout.decode('utf-8')
+    stderr = result.stderr.decode('utf-8')
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
         return None
