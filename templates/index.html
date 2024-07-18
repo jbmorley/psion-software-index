@@ -58,11 +58,9 @@
                         </div>
                     {% endif %}
                     {% if application.readme %}
-                        <details>
+                        <details class="readme">
                             <summary>Readme</summary>
-                            <div class="readme">
-                                {{ application.readme }}
-                            </div>
+                            <div class="readme-contents">{{ application.readme }}</div>
                         </details>
                     {% endif %}
                     {% for version in application.versions %}

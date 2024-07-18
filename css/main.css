@@ -62,8 +62,17 @@ ul.applications > li {
 }
 
 .readme {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.readme-contents {
     white-space: pre;
     font-family: monospace;
+    background-color: #eee;
+    border-radius: 0.5rem;
+    padding: 2rem;
 }
 
 .version-header {
