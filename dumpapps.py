@@ -98,14 +98,27 @@ class LibraryMetadataProvider(object):
                     self.descriptions[application_path] = match.group(3)
                     if not os.path.exists(application_path):
                         print("WARN: Misisng application path", application_path)
-        print(self.descriptions)
 
     def summary_for(self, path):
         directory = os.path.dirname(os.path.join(self.path, path)).lower()
-        print("description_for", directory)
         if directory in self.descriptions:
             return self.descriptions[directory]
         return None
+
+
+class DummyMetadataProvider(object):
+
+    def summary_for(self, path):
+        return None
+
+
+class Image(object):
+
+    def __init__(self, width, height, bpp, data):
+        self.width = width
+        self.height = height
+        self.bpp = bpp
+        self.data = data
 
 
 class Library(object):
@@ -159,19 +172,18 @@ class Application(object):
 
     @property
     def icon(self):
-        for installer in self.installers:
-            if installer.icon_data is not None:
-                return installer.icon_data
+        return select_icon([installer.icon for installer in self.installers
+                            if installer.icon])
 
 
 class Installer(object):
 
-    def __init__(self, library, path, details, sha256, icon_data):
+    def __init__(self, library, path, details, sha256, icons):
         self.library = library
         self.path = path
         self._details = details
         self.sha256 = sha256
-        self.icon_data = icon_data
+        self.icons = icons
 
     @property
     def uid(self):
@@ -197,12 +209,24 @@ class Installer(object):
     def summary(self):
         return self.library.summary_for(self.path)
 
+    @property
+    def icon(self):
+        return select_icon(self.icons)
+
 
 class Collection(object):
 
     def __init__(self, identifier, installers):
         self.identifier = identifier
         self.installers = installers
+
+
+def select_icon(icons):
+    square_icons = [icon for icon in icons if icon.width == icon.height]
+    icons = list(reversed(sorted(icons, key=lambda x: (x.bpp, x.width))))
+    if len(icons) < 1:
+        return None
+    return icons[0]
 
 
 def group_collections(installers, group_by):
@@ -294,36 +318,44 @@ def import_library(library):
             if info is None:
                 continue
 
-            icon_data = None
+            icons = []
             with tempfile.TemporaryDirectory() as temporary_directory_path:
                 with contextlib.chdir(temporary_directory_path):
                     dumpsis_extract(file_path, temporary_directory_path)
                     contents = glob.glob("**/*.aif", recursive=True)
                     if contents:
                         aif_path = contents[0]
-                        subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", aif_path])
-                        aif_basename = os.path.basename(aif_path)
-                        aif_dirname = os.path.dirname(aif_path)
-                        icon_candidates = os.listdir(aif_dirname)
-                        for candidate in icon_candidates:
-                            match = re.match("^" + aif_basename + r"_(\d)_(\d+)x(\d+)_(\d)bpp.bmp$", candidate)
-                            if match:
-                                index = match.group(1)
-                                width = int(match.group(2))
-                                height = int(match.group(3))
-                                bpp = int(match.group(4))
-                                asset_path = os.path.join(aif_dirname, candidate)
-                                if width != 48 or height != 48:
-                                    continue
-                                with open(asset_path, 'rb') as fh:
-                                    icon_data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
-                                break
-
-            installer = Installer(library, rel_path, info, shasum(file_path), icon_data)
+                        icons = get_icons(aif_path)
+            installer = Installer(library, rel_path, info, shasum(file_path), icons)
 
             installers.append(installer)
 
     return installers
+
+
+def get_icons(aif_path):
+    aif_path = os.path.abspath(aif_path)
+    with tempfile.TemporaryDirectory() as directory_path:
+        aif_basename = os.path.basename(aif_path)
+        temporary_aif_path = os.path.join(directory_path, aif_basename)
+        shutil.copyfile(aif_path, temporary_aif_path)
+        subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", temporary_aif_path])
+        aif_basename = os.path.basename(temporary_aif_path)
+        aif_dirname = os.path.dirname(temporary_aif_path)
+        icon_candidates = os.listdir(aif_dirname)
+        icons = []
+        for candidate in icon_candidates:
+            match = re.match("^" + aif_basename + r"_(\d)_(\d+)x(\d+)_(\d)bpp.bmp$", candidate)
+            if match:
+                index = match.group(1)
+                width = int(match.group(2))
+                height = int(match.group(3))
+                bpp = int(match.group(4))
+                asset_path = os.path.join(aif_dirname, candidate)
+                with open(asset_path, 'rb') as fh:
+                    data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
+                    icons.append(Image(width, height, bpp, data))
+        return icons
 
 
 def main():
@@ -341,8 +373,13 @@ def main():
     libraries = []
     installers = []
     for source in definition:
-        metadata_provider = LibraryMetadataProvider(path=source["path"])
-        library = Library(path=source["path"], name=source["name"], metadata_provider=metadata_provider)
+        metadata_provider = DummyMetadataProvider()
+        if "metadata_provider" in definition:
+            metadata_provider_class = definition["metadata_provider"]
+            metadata_provider = globals()[metadata_provider_class](path=source["path"])
+        library = Library(path=source["path"],
+                          name=source["name"],
+                          metadata_provider=metadata_provider)
         libraries.append(library)
         installers += import_library(library)
 

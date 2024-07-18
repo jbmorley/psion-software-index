@@ -43,7 +43,7 @@
                     <div class="application-header">
                         <div class="application-name">
                             {% if application.icon %}
-                                <img class="icon" src="{{ application.icon }}">
+                                <img class="icon" src="{{ application.icon.data }}">
                             {% endif %}
                             {{ application.name }}
                         </div>
@@ -69,18 +69,13 @@
                             {% for variant in version.variants %}
                                 <li>
                                     <div class="release">
-                                        <div class="icon">
-                                            {% if variant.installers[0].icon_data %}
-                                                <img src="{{ variant.installers[0].icon_data }}">
-                                            {% endif %}
-                                        </div>
                                         <div class="language">
                                             {{ variant.installers[0].language_emoji }}
                                         </div>
                                         <div class="path">
                                             <ul>
                                                 {% for installer in variant.installers %}
-                                                    <li><span title="{{ installer.full_path }}">{{ installer.library.name }}</span></li>
+                                                    <li>{{ installer.full_path }}</li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
