@@ -12,6 +12,7 @@ h3 {
 
 .icon {
     width: 48px;
+    image-rendering: pixelated;
 }
 
 ul.applications {
@@ -26,7 +27,7 @@ ul.applications {
 
 ul.applications > li {
     border: 1px solid #eee;
-    padding: 1rem;
+    padding: 2rem;
     border-radius: 1rem;
     background-color: #fff;
 }
@@ -36,7 +37,13 @@ ul.applications > li {
     display: grid;
     grid-template-columns: 2fr 1fr;
     align-items: baseline;
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.application-header img {
+    vertical-align: middle;
+    margin-right: 0.5rem;
 }
 
 .application-name {
@@ -47,6 +54,11 @@ ul.applications > li {
     text-align: right;
     font-family: monospace;
     color: #ccc;
+}
+
+.summary {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
 }
 
 .version-header {

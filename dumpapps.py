@@ -69,11 +69,54 @@ LANGUAGE_EMOJI = {
 }
 
 
+LIBRARY_INDEXES = [
+    "library/epocgames",
+    "library/epocgraphics",
+    "library/epocmap",
+    "library/epocmisc",
+    "library/epocmoney",
+    "library/epocprog",
+    "library/epocutil",
+    "library/epocvault",
+    "library/geofox",
+    "library/s7games",
+]
+
+
+class LibraryMetadataProvider(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.descriptions = {}
+        for index_path in LIBRARY_INDEXES:
+            with open(os.path.join(path, index_path) + ".htm") as fh:
+                for line in fh.readlines():
+                    match = re.match(r"^(\S+)\s+(\d{2}/\d{2}/\d{2})\s+(.+)$", line)
+                    if not match:
+                        continue
+                    application_path = os.path.join(path, index_path, match.group(1)).lower()
+                    self.descriptions[application_path] = match.group(3)
+                    if not os.path.exists(application_path):
+                        print("WARN: Misisng application path", application_path)
+        print(self.descriptions)
+
+    def summary_for(self, path):
+        directory = os.path.dirname(os.path.join(self.path, path)).lower()
+        print("description_for", directory)
+        if directory in self.descriptions:
+            return self.descriptions[directory]
+        return None
+
+
 class Library(object):
 
-    def __init__(self, path, name):
+    def __init__(self, path, name, metadata_provider):
         self.path = path
         self.name = name
+        self.metadata_provider = metadata_provider
+
+    def summary_for(self, path):
+        return self.metadata_provider.summary_for(path)
 
 
 class Summary(object):
@@ -110,6 +153,16 @@ class Application(object):
     def name(self):
         return self.installers[0].name
 
+    @property
+    def summary(self):
+        return self.installers[0].summary
+
+    @property
+    def icon(self):
+        for installer in self.installers:
+            if installer.icon_data is not None:
+                return installer.icon_data
+
 
 class Installer(object):
 
@@ -139,6 +192,10 @@ class Installer(object):
     @property
     def full_path(self):
         return os.path.join(self.library.path, self.path)
+
+    @property
+    def summary(self):
+        return self.library.summary_for(self.path)
 
 
 class Collection(object):
@@ -284,7 +341,8 @@ def main():
     libraries = []
     installers = []
     for source in definition:
-        library = Library(path=source["path"], name=source["name"])
+        metadata_provider = LibraryMetadataProvider(path=source["path"])
+        library = Library(path=source["path"], name=source["name"], metadata_provider=metadata_provider)
         libraries.append(library)
         installers += import_library(library)
 

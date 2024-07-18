@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -10,7 +11,7 @@
 
         <ul>
             {% for library in libraries %}
-                <li>{{ library.name }} &endash; {{ library.path }}</li>
+                <li>{{ library.name }} – {{ library.path }}</li>
             {% endfor %}
         </ul>
 
@@ -41,12 +42,20 @@
                 <li>
                     <div class="application-header">
                         <div class="application-name">
+                            {% if application.icon %}
+                                <img class="icon" src="{{ application.icon }}">
+                            {% endif %}
                             {{ application.name }}
                         </div>
                         <div class="application-identifier">
                             {{ "0x%08x" % application.uid }}
                         </div>
                     </div>
+                    {% if application.summary %}
+                        <div class="summary">
+                            <p>{{ application.summary }}</p>
+                        </div>
+                    {% endif %}
                     {% for version in application.versions %}
                         <div class="version-header">
                             <div class="version-name">
@@ -71,7 +80,7 @@
                                         <div class="path">
                                             <ul>
                                                 {% for installer in variant.installers %}
-                                                    <li>{{ installer.library.name }}</li>
+                                                    <li><span title="{{ installer.full_path }}">{{ installer.library.name }}</span></li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
