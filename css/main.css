@@ -26,10 +26,10 @@ ul.applications {
 }
 
 ul.applications > li {
-    border: 1px solid #eee;
     padding: 2rem;
     border-radius: 1rem;
     background-color: #fff;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
 }
 
 .application-header {
