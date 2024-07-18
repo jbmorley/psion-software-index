@@ -34,7 +34,7 @@ ul.applications > li {
 .application-header {
     border-bottom: 1px solid #eee;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     align-items: baseline;
     margin-bottom: 0.5rem;
 }
