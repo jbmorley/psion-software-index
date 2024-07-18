@@ -60,7 +60,7 @@
                     {% if application.readme %}
                         <details class="readme">
                             <summary>Readme</summary>
-                            <div class="readme-contents">{{ application.readme }}</div>
+                            <div class="readme-contents">{{ application.readme | e }}</div>
                         </details>
                     {% endif %}
                     {% for version in application.versions %}
@@ -84,7 +84,7 @@
                                         <div class="path">
                                             <ul>
                                                 {% for installer in variant.installers %}
-                                                    <li>{{ installer.full_path }}</li>
+                                                    <li>[{{ installer.library.name }}]{{ installer.path }}</li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
