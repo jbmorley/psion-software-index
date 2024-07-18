@@ -424,7 +424,7 @@ def import_apps(library):
             uid = str(uuid.uuid4())
             icons = []
             if aif_path:
-                uid = get_uid(aif_path)
+                uid = get_uid(aif_path).lower()
                 icons = get_icons(aif_path)
 
             installer = App(library, rel_path, uid, shasum(file_path), icons)
