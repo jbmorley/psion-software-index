@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import urllib.parse
 import uuid
 
 import jinja2
@@ -218,15 +219,10 @@ class Installer(object):
         self.sha256 = sha256
         self.icons = icons
         self.readme = readme_for(os.path.join(library.path, path))
-        self.uuid = str(uuid.uuid4())
-
-    @property
-    def uid(self):
-        return "0x%08x" % self._details["uid"]
-
-    @property
-    def version(self):
-        return self._details["version"]
+        self.uuid = str(uuid.uuid4())  # TODO: Is this ever used?
+        self.uid = "0x%08x" % self._details["uid"]
+        self.version = self._details["version"]
+        self.full_path = os.path.join(self.library.path, self.path)
 
     @property
     def name(self):
@@ -237,16 +233,16 @@ class Installer(object):
         return "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
 
     @property
-    def full_path(self):
-        return os.path.join(self.library.path, self.path)
-
-    @property
     def summary(self):
         return self.library.summary_for(self.path)
 
     @property
     def icon(self):
         return select_icon(self.icons)
+
+    @property
+    def install_url(self):
+        return "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path})
 
 
 class App(object):

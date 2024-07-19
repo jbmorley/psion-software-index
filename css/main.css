@@ -67,6 +67,16 @@ ul.applications > li {
     margin-bottom: 1rem;
 }
 
+a.install {
+    color: orange;
+    background-color: #eee;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.6em 1em;
+    display: inline-block;
+    border-radius: 2em;
+}
+
 .readme-contents {
     white-space: pre;
     font-family: monospace;

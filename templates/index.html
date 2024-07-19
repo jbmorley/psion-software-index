@@ -84,7 +84,7 @@
                                         <div class="path">
                                             <ul>
                                                 {% for installer in variant.installers %}
-                                                    <li>[{{ installer.library.name }}]/{{ installer.path }}</li>
+                                                    <li>[{{ installer.library.name }}]/{{ installer.path }} <a class="install" href="{{ installer.install_url }}">Install</a></li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
