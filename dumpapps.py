@@ -242,7 +242,7 @@ class Installer(object):
 
     @property
     def install_url(self):
-        return "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path})
+        return "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path}, quote_via=urllib.parse.quote)
 
 
 class App(object):
