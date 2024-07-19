@@ -32,15 +32,8 @@ IGNORED = set([
     "ebc.sis",
     "jCompilePsion.sis",
     "jRunPsion.sis",
-    "MrMattGames1.sis",
-    "SCOMMSW.SIS",
-    "enotem.SIS",  # Unknown compression scheme 3
-    "eplaym.SIS",  # Unknown compression scheme 3
-    "ER5.SIS",
-    "MSGSUITE.SIS",
     "netutils.sis",
     "Hol5.SIS",
-    "MP4E_E3.SIS", # MondoPondo!
     "nEzumi 2.sis",
 ])
 
