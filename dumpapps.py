@@ -376,7 +376,7 @@ def import_library(library):
             if ext != ".sis" or basename in IGNORED or "System/Install" in file_path:
                 continue
             rel_path = os.path.relpath(file_path, library.path)
-            print(f"Importing installer '{rel_path}'...")
+            print(f"Importing installer '{file_path}'...")
             info = dumpsis(file_path)
             if info is None:
                 continue
@@ -408,7 +408,7 @@ def import_apps(library):
             if ext.lower() != ".app" or basename in IGNORED:
                 continue
             rel_path = os.path.relpath(file_path, library.path)
-            print(f"Importing app '{rel_path}'...")
+            print(f"Importing app '{file_path}'...")
             aif_path = find_sibling(file_path, name + ".aif")
             uid = str(uuid.uuid4())
             icons = []
