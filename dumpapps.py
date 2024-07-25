@@ -29,11 +29,7 @@ BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "build")
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
 # being to allow us to make progress with some of the existing libraries.
 IGNORED = set([
-    "ebc.sis",
-    "jCompilePsion.sis",
-    "jRunPsion.sis",
     "netutils.sis",
-    "Hol5.SIS",
     "nEzumi 2.sis",
 ])
 
