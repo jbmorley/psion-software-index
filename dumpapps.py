@@ -342,7 +342,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                     icons = opolua.get_icons(aif_path)
                 # reference = Reference(parent=library, path=rel_path)
                 summary = library.summary_for(reference)  # TODO: THis is probably wrong.
-                readme = readme_for(path)
+                readme = readme_for(file_path)
                 installer = App(reference + [rel_path], uid, shasum(file_path), name, icons, summary, readme)
                 apps.append(installer)
 
