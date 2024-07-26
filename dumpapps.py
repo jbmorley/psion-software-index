@@ -8,11 +8,9 @@ import contextlib
 import csv
 import glob
 import hashlib
-import json
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 import urllib.parse
 import uuid
@@ -20,6 +18,8 @@ import zipfile
 
 import jinja2
 import yaml
+
+import opolua
 
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -38,8 +38,6 @@ IGNORED = set([
     "nEzumi 2.sis",
     "RevoSDK.zip",
 ])
-
-UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
 
 LANGUAGE_EMOJI = {
     "en_GB": "🇬🇧",
@@ -80,10 +78,6 @@ LIBRARY_INDEXES = [
     "library/geofox",
     "library/s7games",
 ]
-
-
-class InvalidInstaller(Exception):
-    pass
 
 
 class DummyMetadataProvider(object):
@@ -137,15 +131,6 @@ def readme_for(path):
     if readme_path:
         with open(readme_path, "rb") as fh:
             return decode(fh.read())
-
-
-class Image(object):
-
-    def __init__(self, width, height, bpp, data):
-        self.width = width
-        self.height = height
-        self.bpp = bpp
-        self.data = data
 
 
 class Library(object):
@@ -281,52 +266,6 @@ def group_collections(installers, group_by):
     return [Collection(identifier, installers) for identifier, installers in groups.items()]
 
 
-def dumpsis(path):
-    result = subprocess.run(["lua", DUMPSIS_PATH, "--json", path], capture_output=True)
-
-    # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('utf-8')
-    stderr = result.stderr.decode('utf-8')
-
-    if UNSUPPORTED_MESSAGE in stdout + stderr:
-        raise InvalidInstaller(stderr)
-
-    # Check the return code.
-    # It might be nicer to mark
-    try:
-        result.check_returncode()
-    except:
-        print("stderr")
-        print(stderr)
-        print("stdout")
-        print(stdout)
-        exit("Failed to read SIS file")
-
-    return json.loads(stdout)
-
-
-def dumpsis_extract(source, destination):
-    result = subprocess.run(["lua", DUMPSIS_PATH, source, destination], capture_output=True)
-
-    # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('utf-8')
-    stderr = result.stderr.decode('utf-8')
-
-    if "Illegal byte sequence" in stdout + stderr:
-        return None
-
-    # Check the return code.
-    # It might be nicer to mark
-    try:
-        result.check_returncode()
-    except:
-        print("stderr")
-        print(stderr)
-        print("stdout")
-        print(stdout)
-        exit("Failed to read SIS file")
-
-
 def select_name(names, languages):
     for language in languages:
         if language in names:
@@ -347,15 +286,15 @@ def shasum(path):
 
 
 def import_installer(library, reference, path):
-    info = dumpsis(path)
+    info = opolua.dumpsis(path)
     icons = []
     with tempfile.TemporaryDirectory() as temporary_directory_path:
         with contextlib.chdir(temporary_directory_path):
-            dumpsis_extract(path, temporary_directory_path)
+            opolua.dumpsis_extract(path, temporary_directory_path)
             contents = glob.glob("**/*.aif", recursive=True)
             if contents:
                 aif_path = contents[0]
-                icons = get_icons(aif_path)
+                icons = opolua.get_icons(aif_path)
     summary = library.summary_for(reference)
     readme = readme_for(path)
     return Installer(reference, info, shasum(path), icons, summary, readme)
@@ -395,8 +334,8 @@ def import_apps(library, reference=None, path=None, indent=0):
                 uid = str(uuid.uuid4())
                 icons = []
                 if aif_path:
-                    uid = get_uid(aif_path).lower()
-                    icons = get_icons(aif_path)
+                    uid = opolua.get_uid(aif_path).lower()
+                    icons = opolua.get_icons(aif_path)
                 # reference = Reference(parent=library, path=rel_path)
                 summary = library.summary_for(reference)  # TODO: THis is probably wrong.
                 readme = readme_for(path)
@@ -411,7 +350,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                     apps.append(import_installer(library=library,
                                                  reference=reference + [rel_path],
                                                  path=file_path))
-                except InvalidInstaller as e:
+                except opolua.InvalidInstaller as e:
                     print(e)
 
             elif ext == ".zip":
@@ -450,36 +389,6 @@ class Zip(object):
     def __exit__(self, exc_type, exc_value, traceback):
         os.chdir(self.pwd)
         self.temporary_directory.cleanup()
-
-
-def get_uid(aif_path):
-    output = subprocess.check_output(["lua", DUMPAIF_PATH, aif_path]).decode('utf-8', 'ignore')
-    return output.split()[1]
-
-
-def get_icons(aif_path):
-    aif_path = os.path.abspath(aif_path)
-    with tempfile.TemporaryDirectory() as directory_path:
-        aif_basename = os.path.basename(aif_path)
-        temporary_aif_path = os.path.join(directory_path, aif_basename)
-        shutil.copyfile(aif_path, temporary_aif_path)
-        subprocess.check_output(["lua", DUMPAIF_PATH, "-e", temporary_aif_path])
-        aif_basename = os.path.basename(temporary_aif_path)
-        aif_dirname = os.path.dirname(temporary_aif_path)
-        icon_candidates = os.listdir(aif_dirname)
-        icons = []
-        for candidate in icon_candidates:
-            match = re.match("^" + aif_basename + r"_(\d)_(\d+)x(\d+)_(\d)bpp.bmp$", candidate)
-            if match:
-                index = match.group(1)
-                width = int(match.group(2))
-                height = int(match.group(3))
-                bpp = int(match.group(4))
-                asset_path = os.path.join(aif_dirname, candidate)
-                with open(asset_path, 'rb') as fh:
-                    data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
-                    icons.append(Image(width, height, bpp, data))
-        return icons
 
 
 def main():
