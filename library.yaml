@@ -16,3 +16,9 @@ sources:
 - name: Emu48E
   path: assets/tucows_308303_Emu48E
   url: https://archive.org/details/tucows_308303_Emu48E
+- name: Pebbles on the move
+  path: assets/tucows_325813_Pebbles_on_the_move
+  url: https://archive.org/details/tucows_325813_Pebbles_on_the_move
+- name: Speaker
+  path: assets/tucows_322115_Speaker
+  url: https://archive.org/details/tucows_322115_Speaker

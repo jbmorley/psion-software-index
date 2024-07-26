@@ -15,6 +15,7 @@ https://archive.org/details/tucows_11029_Setclock
 https://archive.org/details/tucows_31661_PsiBlocks
 https://archive.org/details/tucows_35391_Fairway
 https://archive.org/details/tucows_47400_Morleysoft_Fern
+https://archive.org/details/tucows_48861_Fancy_Galaxy
 https://archive.org/details/tucows_51566_LittleSense
 https://archive.org/details/tucows_56884_DCALC
 https://archive.org/details/tucows_58742_BMI_Pro
@@ -25,7 +26,7 @@ https://archive.org/details/tucows_151416_WinEpoc
 https://archive.org/details/tucows_171771_AgnPrint
 https://archive.org/details/tucows_260548_DXFV
 https://archive.org/details/tucows_296952_EPOC_Network_Utilities
+https://archive.org/details/tucows_296954_EPOC_FTPServer
 https://archive.org/details/tucows_315698_PsiMIDI
 https://archive.org/details/tucows_321799_Dighandler
-https://archive.org/details/tucows_322115_Speaker
-https://archive.org/details/tucows_325813_Pebbles_on_the_move
+https://mochasoft.dk/freeware/revo.htm
