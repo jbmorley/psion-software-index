@@ -11,6 +11,10 @@ ASSETS_LIST_PATH="$ROOT_DIRECTORY/assets.txt"
 
 source "$ROOT_DIRECTORY/environment.sh"
 
+# Generate the asset list from the definition.
+cd "$ROOT_DIRECTORY"
+pipenv run python3 generate-asset-list.py library.yaml
+
 # Download the assets.
 mkdir -p "$ASSETS_DIRECTORY"
 cd "$ASSETS_DIRECTORY"
