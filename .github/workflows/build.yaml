@@ -23,7 +23,7 @@ jobs:
         submodules: recursive
 
     - name: Install dependencies
-      run: install-dependencies.sh
+      run: ./install-dependencies.sh
 
     - name: Cache the assets
       uses: actions/cache@v4
@@ -33,4 +33,4 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('build.sh') }}
 
     - name: Build and test
-      run: build.sh
+      run: ./build.sh
