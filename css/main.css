@@ -25,6 +25,12 @@ ul.applications {
     margin: 1rem;
 }
 
+@media screen and (max-width: 1000px) {
+    ul.applications {
+        grid-template-columns: 1fr;
+    }
+}
+
 ul.applications > li {
     padding: 2rem;
     border-radius: 1rem;
