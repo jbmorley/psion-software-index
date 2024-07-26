@@ -25,7 +25,7 @@ import opolua
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
-BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "build")
+BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
 
 OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "opolua")
 DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")

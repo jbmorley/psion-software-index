@@ -22,7 +22,10 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Python
+    - name: Install Lua
+      uses: leafo/gh-actions-lua@v10
+
+    - name: Install Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.9"
@@ -42,4 +45,32 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('build.sh') }}
 
     - name: Build and test
-      run: ./build.sh
+      run: |
+        ./build.sh
+        chmod -v -R +rX "_site/"
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+
+  deploy:
+
+    needs: build
+    if: ${{ github.ref == 'refs/heads/main' }}
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or the latest "vX.X.X" version tag for this action
