@@ -77,18 +77,15 @@
                         <ul>
                             {% for variant in version.variants %}
                                 <li>
-                                    <div class="release">
-                                        <div class="language">
-                                            {{ variant.installers[0].language_emoji }}
-                                        </div>
-                                        <div class="path">
-                                            <ul>
-                                                {% for installer in variant.installers %}
-                                                    <li>{{ installer.reference }} <a class="install" href="{{ installer.install_url }}">Install</a></li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <table class="release">
+                                        {% for installer in variant.installers %}
+                                            <tr>
+                                                <td>{{ variant.installers[0].language_emoji }}</td>
+                                                <td class="path">{{ installer.reference }}</td>
+                                                <td><a class="install" href="{{ installer.install_url }}">Install</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
                                 </li>
                             {% endfor %}
                         </ul>
