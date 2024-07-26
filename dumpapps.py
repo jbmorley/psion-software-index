@@ -76,6 +76,16 @@ LIBRARY_INDEXES = [
 ]
 
 
+class InvalidInstaller(Exception):
+    pass
+
+
+class DummyMetadataProvider(object):
+
+    def summary_for(self, reference):
+        return None
+
+
 class LibraryMetadataProvider(object):
 
     def __init__(self, path):
@@ -92,8 +102,8 @@ class LibraryMetadataProvider(object):
                     if not os.path.exists(application_path):
                         print("WARN: Misisng application path", application_path)
 
-    def summary_for(self, path):
-        directory = os.path.dirname(os.path.join(self.path, path)).lower()
+    def summary_for(self, reference):
+        directory = os.path.dirname(str(reference)).lower()
         if directory in self.descriptions:
             return self.descriptions[directory]
         return None
@@ -121,12 +131,6 @@ def readme_for(path):
     if readme_path:
         with open(readme_path, "rb") as fh:
             return decode(fh.read())
-
-
-class DummyMetadataProvider(object):
-
-    def summary_for(self, path):
-        return None
 
 
 class Image(object):
@@ -201,29 +205,22 @@ class Application(object):
 
 class Installer(object):
 
-    def __init__(self, library, path, details, sha256, icons):
-        self.library = library
-        self.path = path
+    def __init__(self, reference, details, sha256, icons, summary):
+        self.reference = reference
         self._details = details
         self.sha256 = sha256
         self.icons = icons
-        self.readme = readme_for(os.path.join(library.path, path))
-        self.uuid = str(uuid.uuid4())  # TODO: Is this ever used?
+        self.summary = summary
+        self.uuid = str(uuid.uuid4())  # TODO: Is this ever used? <------ remove me
         self.uid = "0x%08x" % self._details["uid"]
         self.version = self._details["version"]
-        self.full_path = os.path.join(self.library.path, self.path)
+        self.full_path = str(reference)
+        self.language_emoji = "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
+        self.readme = readme_for(str(reference))  # TODO: Inject this
 
     @property
     def name(self):
         return select_name(self._details["name"], ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL"])
-
-    @property
-    def language_emoji(self):
-        return "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
-
-    @property
-    def summary(self):
-        return self.library.summary_for(self.path)
 
     @property
     def icon(self):
@@ -236,37 +233,20 @@ class Installer(object):
 
 class App(object):
 
-    def __init__(self, library, path, identifier, sha256, icons):
-        self.library = library
-        self.path = path
+    def __init__(self, reference, identifier, sha256, icons, summary):
+        # TODO: We still need the library as an entity distinct from the reference.
+        # TODO: Perhaps we can inject the library in to the method that creates the Installer or App instance.
+        self.reference = reference
         self.identifier = identifier
         self.sha256 = sha256
         self.icons = icons
-        self.readme = readme_for(os.path.join(library.path, path))
-
-    @property
-    def uid(self):
-        return self.identifier
-
-    @property
-    def version(self):
-        return "Unknown Version"
-
-    @property
-    def name(self):
-        return os.path.basename(self.path)
-
-    @property
-    def language_emoji(self):
-        return "Unknown Language"
-
-    @property
-    def full_path(self):
-        return os.path.join(self.library.path, self.path)
-
-    @property
-    def summary(self):
-        return self.library.summary_for(self.path)
+        self.summary = summary
+        self.version = "Unknown Version"
+        self.language_emoji = "Unknown Language"
+        self.full_path = str(reference)
+        self.uid = self.identifier
+        self.name = os.path.basename(self.full_path)  # TODO: Extract this from a neighboring AIF if it exists.
+        self.readme = readme_for(str(reference))  # TODO: Inject this
 
     @property
     def icon(self):
@@ -303,7 +283,7 @@ def dumpsis(path):
     stderr = result.stderr.decode('utf-8')
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
-        return None
+        raise InvalidInstaller(stderr)
 
     # Check the return code.
     # It might be nicer to mark
@@ -373,23 +353,37 @@ def import_library(library):
                 continue
             rel_path = os.path.relpath(file_path, library.path)
             print(f"Importing installer '{file_path}'...")
-            info = dumpsis(file_path)
-            if info is None:
-                continue
-
-            icons = []
-            with tempfile.TemporaryDirectory() as temporary_directory_path:
-                with contextlib.chdir(temporary_directory_path):
-                    dumpsis_extract(file_path, temporary_directory_path)
-                    contents = glob.glob("**/*.aif", recursive=True)
-                    if contents:
-                        aif_path = contents[0]
-                        icons = get_icons(aif_path)
-            installer = Installer(library, rel_path, info, shasum(file_path), icons)
-
-            installers.append(installer)
+            try:
+                reference = Reference(container=library, path=rel_path)
+                installers.append(import_installer(library=library, reference=reference, path=file_path))
+            except InvalidInstaller as e:
+                print(e)
 
     return installers
+
+
+def import_installer(library, reference, path):
+    info = dumpsis(path)
+    icons = []
+    with tempfile.TemporaryDirectory() as temporary_directory_path:
+        with contextlib.chdir(temporary_directory_path):
+            dumpsis_extract(path, temporary_directory_path)
+            contents = glob.glob("**/*.aif", recursive=True)
+            if contents:
+                aif_path = contents[0]
+                icons = get_icons(aif_path)
+    summary = library.summary_for(reference)
+    return Installer(reference, info, shasum(path), icons, summary)
+
+
+class Reference(object):
+
+    def __init__(self, container, path):
+        self.container = container
+        self.path = path
+
+    def __str__(self):
+        return os.path.join(self.container.path, self.path)
 
 
 def import_apps(library):
@@ -411,8 +405,9 @@ def import_apps(library):
             if aif_path:
                 uid = get_uid(aif_path).lower()
                 icons = get_icons(aif_path)
-
-            installer = App(library, rel_path, uid, shasum(file_path), icons)
+            reference = Reference(container=library, path=rel_path)
+            summary = library.summary_for(reference)
+            installer = App(reference, uid, shasum(file_path), icons, summary)
             apps.append(installer)
 
     return apps
