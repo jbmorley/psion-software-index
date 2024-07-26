@@ -27,12 +27,12 @@ class Image(object):
         self.data = data
 
 
-def dumpsis(path):
-    result = subprocess.run(["lua", DUMPSIS_PATH, "--json", path], capture_output=True)
+def run_json_command(command, path):
+    result = subprocess.run(["lua", command, "--json", path], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('utf-8')
-    stderr = result.stderr.decode('utf-8')
+    stdout = result.stdout.decode('utf-8', 'ignore')  # TODO: utf-8 support in dumpaif.
+    stderr = result.stderr.decode('utf-8', 'ignore')
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
         raise InvalidInstaller(stderr)
@@ -49,6 +49,14 @@ def dumpsis(path):
         exit("Failed to read SIS file")
 
     return json.loads(stdout)
+
+
+def dumpsis(path):
+    return run_json_command(DUMPSIS_PATH, path)
+
+
+def dumpaif(path):
+    return run_json_command(DUMPAIF_PATH, path)
 
 
 def dumpsis_extract(source, destination):
@@ -96,8 +104,3 @@ def get_icons(aif_path):
                     data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
                     icons.append(Image(width, height, bpp, data))
         return icons
-
-
-def get_uid(aif_path):
-    output = subprocess.check_output(["lua", DUMPAIF_PATH, aif_path]).decode('utf-8', 'ignore')
-    return output.split()[1]

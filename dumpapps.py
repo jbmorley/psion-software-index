@@ -80,6 +80,9 @@ LIBRARY_INDEXES = [
 ]
 
 
+LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
+
+
 class DummyMetadataProvider(object):
 
     def summary_for(self, reference):
@@ -211,7 +214,7 @@ class Installer(object):
 
     @property
     def name(self):
-        return select_name(self._details["name"], ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL"])
+        return select_name(self._details["name"])
 
     @property
     def icon(self):
@@ -224,12 +227,11 @@ class Installer(object):
 
 class App(object):
 
-    def __init__(self, reference, identifier, sha256, icons, summary, readme):
-        # TODO: We still need the library as an entity distinct from the reference.
-        # TODO: Perhaps we can inject the library in to the method that creates the Installer or App instance.
+    def __init__(self, reference, identifier, sha256, name, icons, summary, readme):
         self.reference = reference
         self.identifier = identifier
         self.sha256 = sha256
+        self.name = name
         self.icons = icons
         self.summary = summary
         self.readme = readme
@@ -237,7 +239,6 @@ class App(object):
         self.language_emoji = "Unknown Language"
         self.full_path = str(reference)
         self.uid = self.identifier
-        self.name = os.path.basename(reference[-1])  # TODO: Extract this from a neighboring AIF if it exists.
 
     @property
     def icon(self):
@@ -266,8 +267,8 @@ def group_collections(installers, group_by):
     return [Collection(identifier, installers) for identifier, installers in groups.items()]
 
 
-def select_name(names, languages):
-    for language in languages:
+def select_name(names):
+    for language in LANGUAGE_ORDER:
         if language in names:
             return names[language]
     print(names)
@@ -333,13 +334,16 @@ def import_apps(library, reference=None, path=None, indent=0):
                 aif_path = find_sibling(file_path, name + ".aif")
                 uid = str(uuid.uuid4())
                 icons = []
+                name = os.path.basename(rel_path)
                 if aif_path:
-                    uid = opolua.get_uid(aif_path).lower()
+                    info = opolua.dumpaif(aif_path)
+                    uid = ("0x%08x" % info["uid3"]).lower()
+                    name = select_name(info["captions"])
                     icons = opolua.get_icons(aif_path)
                 # reference = Reference(parent=library, path=rel_path)
                 summary = library.summary_for(reference)  # TODO: THis is probably wrong.
                 readme = readme_for(path)
-                installer = App(reference + [rel_path], uid, shasum(file_path), icons, summary, readme)
+                installer = App(reference + [rel_path], uid, shasum(file_path), name, icons, summary, readme)
                 apps.append(installer)
 
             elif ext == ".sis":
