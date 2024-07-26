@@ -17,4 +17,4 @@ ia download 3-libjune-05
 
 # Build the index.
 cd "$ROOT_DIRECTORY"
-pipenv run python3 dumpapps.py library_test.yaml
+pipenv run python3 dumpapps.py library.yaml
