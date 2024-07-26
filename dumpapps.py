@@ -76,7 +76,22 @@ LIBRARY_INDEXES = [
     "library/epocutil",
     "library/epocvault",
     "library/geofox",
+    "library/msgsuite",
+    "library/pcba",
+    "library/psiwin",
+    "library/revogames",
+    "library/s3comms",
+    "library/s3games",
+    "library/s3graphics",
+    "library/s3mapping",
+    "library/s3misc",
+    "library/s3money",
+    "library/s3prog",
+    "library/s3units",
+    "library/s3util",
+    "library/s3vault",
     "library/s7games",
+    "library/siena",
 ]
 
 
@@ -85,7 +100,7 @@ LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL",
 
 class DummyMetadataProvider(object):
 
-    def summary_for(self, reference):
+    def summary_for(self, path):
         return None
 
 
@@ -105,10 +120,12 @@ class LibraryMetadataProvider(object):
                     if not os.path.exists(application_path):
                         print("WARN: Misisng application path", application_path)
 
-    def summary_for(self, reference):
-        directory = os.path.dirname(str(reference)).lower()
-        if directory in self.descriptions:
-            return self.descriptions[directory]
+    def summary_for(self, path):
+        directory = os.path.dirname(path).lower()
+        while directory != "/":
+            if directory in self.descriptions:
+                return self.descriptions[directory]
+            directory = os.path.dirname(directory)
         return None
 
 
@@ -296,7 +313,7 @@ def import_installer(library, reference, path):
             if contents:
                 aif_path = contents[0]
                 icons = opolua.get_icons(aif_path)
-    summary = library.summary_for(reference)
+    summary = library.summary_for(path)
     readme = readme_for(path)
     return Installer(reference, info, shasum(path), icons, summary, readme)
 
@@ -340,8 +357,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                     uid = ("0x%08x" % info["uid3"]).lower()
                     name = select_name(info["captions"])
                     icons = opolua.get_icons(aif_path)
-                # reference = Reference(parent=library, path=rel_path)
-                summary = library.summary_for(reference)  # TODO: THis is probably wrong.
+                summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
                 installer = App(reference + [rel_path], uid, shasum(file_path), name, icons, summary, readme)
                 apps.append(installer)
