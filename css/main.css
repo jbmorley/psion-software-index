@@ -103,6 +103,7 @@ a.install {
 
 .version-details {
     text-align: right;
+    font-variant: small-caps;
 }
 
 .release .path {
