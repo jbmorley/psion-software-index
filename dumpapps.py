@@ -17,6 +17,7 @@ import uuid
 import zipfile
 
 import jinja2
+import pycdlib
 import yaml
 
 import opolua
@@ -35,8 +36,10 @@ DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
 # being to allow us to make progress with some of the existing libraries.
 IGNORED = set([
     "netutils.sis",
+    "NETUTILS.SIS",
     "nEzumi 2.sis",
     "RevoSDK.zip",
+    "SCOMMSW.SIS",
 ])
 
 LANGUAGE_EMOJI = {
@@ -96,6 +99,20 @@ LIBRARY_INDEXES = [
 
 
 LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
+
+
+class Chdir(object):
+
+    def __init__(self, path):
+        self.path = path
+
+    def __enter__(self):
+        self.pwd = os.getcwd()
+        os.chdir(self.path)
+        return self.path
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.chdir(self.pwd)
 
 
 class DummyMetadataProvider(object):
@@ -307,7 +324,7 @@ def import_installer(library, reference, path):
     info = opolua.dumpsis(path)
     icons = []
     with tempfile.TemporaryDirectory() as temporary_directory_path:
-        with contextlib.chdir(temporary_directory_path):
+        with Chdir(temporary_directory_path):
             opolua.dumpsis_extract(path, temporary_directory_path)
             contents = glob.glob("**/*.aif", recursive=True)
             if contents:
@@ -384,6 +401,12 @@ def import_apps(library, reference=None, path=None, indent=0):
                 except zipfile.BadZipFile as e:
                     print(" " * indent + f"Corrupt zip file '{file_path}', {e}.")
 
+            elif ext == ".iso":
+
+                print(" " * indent + f"Importing ISO '{file_path}'...")
+                with Iso(file_path) as contents_path:
+                    apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
+
     return apps
 
 
@@ -405,6 +428,65 @@ class Zip(object):
             os.chdir(self.pwd)
             self.temporary_directory.cleanup()
             raise
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.chdir(self.pwd)
+        self.temporary_directory.cleanup()
+
+
+def extract_iso(path, destination_path):
+
+    iso = pycdlib.PyCdlib()
+    iso.open(path)
+
+    pathname = 'iso_path'
+    start_path = '/'
+    root_entry = iso.get_record(**{pathname: start_path})
+
+    dirs = collections.deque([root_entry])
+    while dirs:
+        dir_record = dirs.popleft()
+        ident_to_here = iso.full_path_from_dirrecord(dir_record,
+                                                     rockridge=pathname == 'rr_path')
+        relname = ident_to_here[len(start_path):]
+        if relname and relname[0] == '/':
+            relname = relname[1:]
+        print(relname)
+        if dir_record.is_dir():
+            if relname != '':
+                os.makedirs(os.path.join(destination_path, relname))
+            child_lister = iso.list_children(**{pathname: ident_to_here})
+
+            for child in child_lister:
+                if child is None or child.is_dot() or child.is_dotdot():
+                    continue
+                dirs.append(child)
+        else:
+            if dir_record.is_symlink():
+                fullpath = os.path.join(destination_path, relname)
+                local_dir = os.path.dirname(fullpath)
+                local_link_name = os.path.basename(fullpath)
+                old_dir = os.getcwd()
+                os.chdir(local_dir)
+                os.symlink(dir_record.rock_ridge.symlink_path(), local_link_name)
+                os.chdir(old_dir)
+            else:
+                iso.get_file_from_iso(os.path.join(destination_path, relname), **{pathname: ident_to_here})
+
+
+class Iso(object):
+
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
+        self.temporary_directory = tempfile.TemporaryDirectory()
+
+    def __enter__(self):
+        print(f"Opening ISO file '{self.path}'...")
+        self.pwd = os.getcwd()
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        os.chdir(self.temporary_directory.name)
+        extract_iso(self.path, self.temporary_directory.name)
+        return self.temporary_directory.name
 
     def __exit__(self, exc_type, exc_value, traceback):
         os.chdir(self.pwd)
