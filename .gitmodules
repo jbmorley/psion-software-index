@@ -1,0 +1,3 @@
+[submodule "opolua"]
+	path = opolua
+	url = https://github.com/inseven/opolua.git

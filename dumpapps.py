@@ -26,6 +26,10 @@ ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "build")
 
+OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "opolua")
+DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")
+DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
+
 
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
 # being to allow us to make progress with some of the existing libraries.
@@ -278,7 +282,7 @@ def group_collections(installers, group_by):
 
 
 def dumpsis(path):
-    result = subprocess.run(["lua", "/Users/jbmorley/Projects/opolua/src/dumpsis.lua", "--json", path], capture_output=True)
+    result = subprocess.run(["lua", DUMPSIS_PATH, "--json", path], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
     stdout = result.stdout.decode('utf-8')
@@ -302,7 +306,7 @@ def dumpsis(path):
 
 
 def dumpsis_extract(source, destination):
-    result = subprocess.run(["lua", "/Users/jbmorley/Projects/opolua/src/dumpsis.lua", source, destination], capture_output=True)
+    result = subprocess.run(["lua", DUMPSIS_PATH, source, destination], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
     stdout = result.stdout.decode('utf-8')
@@ -449,7 +453,7 @@ class Zip(object):
 
 
 def get_uid(aif_path):
-    output = subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", aif_path]).decode('utf-8', 'ignore')
+    output = subprocess.check_output(["lua", DUMPAIF_PATH, aif_path]).decode('utf-8', 'ignore')
     return output.split()[1]
 
 
@@ -459,7 +463,7 @@ def get_icons(aif_path):
         aif_basename = os.path.basename(aif_path)
         temporary_aif_path = os.path.join(directory_path, aif_basename)
         shutil.copyfile(aif_path, temporary_aif_path)
-        subprocess.check_output(["lua", "/Users/jbmorley/Projects/opolua/src/dumpaif.lua", "-e", temporary_aif_path])
+        subprocess.check_output(["lua", DUMPAIF_PATH, "-e", temporary_aif_path])
         aif_basename = os.path.basename(temporary_aif_path)
         aif_dirname = os.path.dirname(temporary_aif_path)
         icon_candidates = os.listdir(aif_dirname)
