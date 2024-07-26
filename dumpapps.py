@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 import urllib.parse
 import uuid
+import zipfile
 
 import jinja2
 import yaml
@@ -31,6 +32,7 @@ BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "build")
 IGNORED = set([
     "netutils.sis",
     "nEzumi 2.sis",
+    "RevoSDK.zip",
 ])
 
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
@@ -205,18 +207,18 @@ class Application(object):
 
 class Installer(object):
 
-    def __init__(self, reference, details, sha256, icons, summary):
+    def __init__(self, reference, details, sha256, icons, summary, readme):
         self.reference = reference
         self._details = details
         self.sha256 = sha256
         self.icons = icons
         self.summary = summary
+        self.readme = readme
         self.uuid = str(uuid.uuid4())  # TODO: Is this ever used? <------ remove me
         self.uid = "0x%08x" % self._details["uid"]
         self.version = self._details["version"]
         self.full_path = str(reference)
         self.language_emoji = "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
-        self.readme = readme_for(str(reference))  # TODO: Inject this
 
     @property
     def name(self):
@@ -233,7 +235,7 @@ class Installer(object):
 
 class App(object):
 
-    def __init__(self, reference, identifier, sha256, icons, summary):
+    def __init__(self, reference, identifier, sha256, icons, summary, readme):
         # TODO: We still need the library as an entity distinct from the reference.
         # TODO: Perhaps we can inject the library in to the method that creates the Installer or App instance.
         self.reference = reference
@@ -241,12 +243,12 @@ class App(object):
         self.sha256 = sha256
         self.icons = icons
         self.summary = summary
+        self.readme = readme
         self.version = "Unknown Version"
         self.language_emoji = "Unknown Language"
         self.full_path = str(reference)
         self.uid = self.identifier
-        self.name = os.path.basename(self.full_path)  # TODO: Extract this from a neighboring AIF if it exists.
-        self.readme = readme_for(str(reference))  # TODO: Inject this
+        self.name = os.path.basename(reference[-1])  # TODO: Extract this from a neighboring AIF if it exists.
 
     @property
     def icon(self):
@@ -340,28 +342,6 @@ def shasum(path):
     return sha256.hexdigest()
 
 
-def import_library(library):
-    installers = []
-
-    print(f"Importing library '{library.path}'...")
-    for root, dirs, files in os.walk(library.path):
-        file_paths = [os.path.join(root, f) for f in files]
-        for file_path in file_paths:
-            basename = os.path.basename(file_path)
-            ext = os.path.splitext(file_path)[1].lower()
-            if ext != ".sis" or basename in IGNORED or "System/Install" in file_path:
-                continue
-            rel_path = os.path.relpath(file_path, library.path)
-            print(f"Importing installer '{file_path}'...")
-            try:
-                reference = Reference(container=library, path=rel_path)
-                installers.append(import_installer(library=library, reference=reference, path=file_path))
-            except InvalidInstaller as e:
-                print(e)
-
-    return installers
-
-
 def import_installer(library, reference, path):
     info = dumpsis(path)
     icons = []
@@ -373,44 +353,99 @@ def import_installer(library, reference, path):
                 aif_path = contents[0]
                 icons = get_icons(aif_path)
     summary = library.summary_for(reference)
-    return Installer(reference, info, shasum(path), icons, summary)
+    readme = readme_for(path)
+    return Installer(reference, info, shasum(path), icons, summary, readme)
 
 
 class Reference(object):
 
-    def __init__(self, container, path):
-        self.container = container
+    def __init__(self, parent, path):
+        self.parent = parent
         self.path = path
 
     def __str__(self):
-        return os.path.join(self.container.path, self.path)
+        return os.path.join(self.parent.path, self.path)
 
 
-def import_apps(library):
+def import_apps(library, reference=None, path=None, indent=0):
+    reference = reference if reference else [library]
+    path = path if path else library.path
     apps = []
 
-    print(f"Importing library '{library.path}'...")
-    for root, dirs, files in os.walk(library.path):
+    print(" " * indent + f"Importing library '{path}'...")
+    for root, dirs, files in os.walk(path):
         file_paths = [os.path.join(root, f) for f in files]
         for file_path in file_paths:
             basename = os.path.basename(file_path)
             name, ext = os.path.splitext(basename)
-            if ext.lower() != ".app" or basename in IGNORED:
+            ext = ext.lower()
+            rel_path = os.path.relpath(file_path, path)
+
+            if basename in IGNORED or "System/Install" in file_path:
                 continue
-            rel_path = os.path.relpath(file_path, library.path)
-            print(f"Importing app '{file_path}'...")
-            aif_path = find_sibling(file_path, name + ".aif")
-            uid = str(uuid.uuid4())
-            icons = []
-            if aif_path:
-                uid = get_uid(aif_path).lower()
-                icons = get_icons(aif_path)
-            reference = Reference(container=library, path=rel_path)
-            summary = library.summary_for(reference)
-            installer = App(reference, uid, shasum(file_path), icons, summary)
-            apps.append(installer)
+
+            elif ext == ".app":
+
+                print(" " * indent + f"Importing app '{file_path}'...")
+                aif_path = find_sibling(file_path, name + ".aif")
+                uid = str(uuid.uuid4())
+                icons = []
+                if aif_path:
+                    uid = get_uid(aif_path).lower()
+                    icons = get_icons(aif_path)
+                # reference = Reference(parent=library, path=rel_path)
+                summary = library.summary_for(reference)  # TODO: THis is probably wrong.
+                readme = readme_for(path)
+                installer = App(reference + [rel_path], uid, shasum(file_path), icons, summary, readme)
+                apps.append(installer)
+
+            elif ext == ".sis":
+
+                print(" " * indent + f"Importing installer '{file_path}'...")
+                try:
+                    # reference = Reference(parent=library, path=rel_path)
+                    apps.append(import_installer(library=library,
+                                                 reference=reference + [rel_path],
+                                                 path=file_path))
+                except InvalidInstaller as e:
+                    print(e)
+
+            elif ext == ".zip":
+
+                print(" " * indent + f"Importing zip '{file_path}'...")
+                try:
+                    with Zip(file_path) as contents_path:
+                        apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
+                except NotImplementedError as e:
+                    print(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
+                except zipfile.BadZipFile as e:
+                    print(" " * indent + f"Corrupt zip file '{file_path}', {e}.")
 
     return apps
+
+
+class Zip(object):
+
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
+        self.temporary_directory = tempfile.TemporaryDirectory()
+
+    def __enter__(self):
+        self.pwd = os.getcwd()
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        os.chdir(self.temporary_directory.name)
+        try:
+            with zipfile.ZipFile(self.path) as zip:
+                zip.extractall()
+            return self.temporary_directory.name
+        except:
+            os.chdir(self.pwd)
+            self.temporary_directory.cleanup()
+            raise
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.chdir(self.pwd)
+        self.temporary_directory.cleanup()
 
 
 def get_uid(aif_path):
@@ -466,7 +501,6 @@ def main():
                           name=source["name"],
                           metadata_provider=metadata_provider)
         libraries.append(library)
-        installers += import_library(library)
         installers += import_apps(library)
 
     unique_uids = set()

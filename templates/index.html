@@ -81,7 +81,18 @@
                                         {% for installer in variant.installers %}
                                             <tr>
                                                 <td>{{ variant.installers[0].language_emoji }}</td>
-                                                <td class="path">{{ installer.reference }}</td>
+                                                <td class="path">
+                                                    {% for component in installer.reference %}
+                                                        {% if component.name %}
+                                                            {{ component.name }}
+                                                        {% else %}
+                                                            {{ component | e }}
+                                                        {% endif %}
+                                                        {% if not loop.last %}
+                                                            &#8594;
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
                                                 {% if options.show_install_buttons %}
                                                     <td><a class="install" href="{{ installer.install_url }}">Install</a></td>
                                                 {% endif %}
