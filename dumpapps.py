@@ -457,7 +457,7 @@ def main():
 
     libraries = []
     installers = []
-    for source in definition:
+    for source in definition["sources"]:
         metadata_provider = DummyMetadataProvider()
         if "metadata_provider" in source:
             metadata_provider_class = source["metadata_provider"]
@@ -502,7 +502,8 @@ def main():
                     os.path.join(BUILD_DIRECTORY, "main.css"))
 
     with open(os.path.join(BUILD_DIRECTORY, "index.html"), "w") as fh:
-        fh.write(template.render(libraries=libraries,
+        fh.write(template.render(options=definition["options"],
+                                 libraries=libraries,
                                  summary=summary,
                                  applications=applications))
 

@@ -82,7 +82,9 @@
                                             <tr>
                                                 <td>{{ variant.installers[0].language_emoji }}</td>
                                                 <td class="path">{{ installer.reference }}</td>
-                                                <td><a class="install" href="{{ installer.install_url }}">Install</a></td>
+                                                {% if options.show_install_buttons %}
+                                                    <td><a class="install" href="{{ installer.install_url }}">Install</a></td>
+                                                {% endif %}
                                             </tr>
                                         {% endfor %}
                                     </table>
