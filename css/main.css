@@ -78,7 +78,7 @@ a.install {
 }
 
 .readme-contents {
-    white-space: pre;
+    white-space: pre-wrap;
     font-family: monospace;
     background-color: #eee;
     border-radius: 0.5rem;
@@ -101,4 +101,5 @@ a.install {
 
 .release .path {
     font-family: monospace;
+    word-break: break-all;
 }
