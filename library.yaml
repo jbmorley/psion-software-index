@@ -3,3 +3,5 @@ options:
 sources:
 - name: 3-Lib June '05
   path: assets/3-libjune-05
+- name: PSION CD - Volume 1 ver 2.0
+  path: assets/psioncdvol1

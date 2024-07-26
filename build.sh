@@ -14,6 +14,7 @@ source "$ROOT_DIRECTORY/environment.sh"
 mkdir -p "$ASSETS_DIRECTORY"
 cd "$ASSETS_DIRECTORY"
 ia download 3-libjune-05
+ia download psioncdvol1
 
 # Build the index.
 cd "$ROOT_DIRECTORY"
