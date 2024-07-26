@@ -1,0 +1,11 @@
+options:
+  show_install_buttons: False
+sources:
+- name: 3-Lib June '05
+  path: /Users/jbmorley/Local/Psion Scratch/3-libjune-05
+  # metadata_provider: LibraryMetadataProvider
+# - name: 3-Lib June '05
+#   path: /Volumes/3LIBJUNE05
+#   metadata_provider: LibraryMetadataProvider
+# - name: Archive
+#   path: /Users/jbmorley/Software/Psion/EPOC/Applications
