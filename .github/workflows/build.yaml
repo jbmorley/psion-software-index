@@ -42,7 +42,7 @@ jobs:
       with:
         path: |
           assets
-        key: ${{ runner.os }}-${{ hashFiles('build.sh') }}
+        key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}
 
     - name: Build and test
       run: |

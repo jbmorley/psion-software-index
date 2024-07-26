@@ -3,5 +3,16 @@ options:
 sources:
 - name: 3-Lib June '05
   path: assets/3-libjune-05
+  url: https://archive.org/details/3-libjune-05
 - name: PSION CD - Volume 1 ver 2.0
   path: assets/psioncdvol1
+  url: https://archive.org/details/psioncdvol1
+- name: PSION CD - Volume 2 ver 2.1
+  url: https://archive.org/details/psioncdvol2
+  path: assets/psioncdvol2
+- name: Alignment
+  path: assets/tucows_228843_Alignment
+  url: https://archive.org/details/tucows_228843_Alignment
+- name: Emu48E
+  path: assets/tucows_308303_Emu48E
+  url: https://archive.org/details/tucows_308303_Emu48E

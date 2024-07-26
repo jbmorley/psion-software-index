@@ -172,9 +172,10 @@ def readme_for(path):
 
 class Library(object):
 
-    def __init__(self, path, name, metadata_provider):
+    def __init__(self, path, name, url, metadata_provider):
         self.path = path
         self.name = name
+        self.url = url
         self.metadata_provider = metadata_provider
 
     def summary_for(self, path):
@@ -514,6 +515,7 @@ def main():
             metadata_provider = globals()[metadata_provider_class](path=source["path"])
         library = Library(path=source["path"],
                           name=source["name"],
+                          url=source["url"] if "url" in source else None,
                           metadata_provider=metadata_provider)
         libraries.append(library)
         installers += import_apps(library)

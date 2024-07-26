@@ -12,7 +12,11 @@
 
         <ul>
             {% for library in libraries %}
-                <li>{{ library.name }} – {{ library.path }}</li>
+                <li>
+                    {% if library.url %}<a href="{{ library.url }}">{% endif %}
+                    {% if library.name %}{{ library.name }}{% else %}{{ library.path }}{% endif %}
+                    {% if library.url %}</a>{% endif %}
+                </li>
             {% endfor %}
         </ul>
 
