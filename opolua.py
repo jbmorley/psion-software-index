@@ -29,10 +29,8 @@ class Image(object):
 
 def run_json_command(command, path):
     result = subprocess.run(["lua", command, "--json", path], capture_output=True)
-
-    # Sadly we ignore foreign characters right now and using CP1252 by default.
-    stdout = result.stdout.decode('utf-8', 'ignore')  # TODO: utf-8 support in dumpaif.
-    stderr = result.stderr.decode('utf-8', 'ignore')
+    stdout = result.stdout.decode('utf-8')
+    stderr = result.stderr.decode('utf-8')
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
         raise InvalidInstaller(stderr)
