@@ -452,7 +452,6 @@ def extract_iso(path, destination_path):
         relname = ident_to_here[len(start_path):]
         if relname and relname[0] == '/':
             relname = relname[1:]
-        print(relname)
         if dir_record.is_dir():
             if relname != '':
                 os.makedirs(os.path.join(destination_path, relname))
