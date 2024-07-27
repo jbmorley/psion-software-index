@@ -7,7 +7,6 @@ https://archive.org/details/psion_netbook
 https://archive.org/details/psion_pulster
 https://archive.org/details/psion-street-planner-99-uk
 https://archive.org/details/psionpowercd2de
-https://archive.org/details/psionpowercd2de
 https://archive.org/details/psionsystemvoraussetzungen
 https://archive.org/details/streetplanner99
 https://archive.org/details/tucows_6844_Golf_Pro_Enhanced
@@ -23,5 +22,4 @@ https://archive.org/details/tucows_67813_Internettime_German
 https://archive.org/details/tucows_74116_Goby
 https://archive.org/details/tucows_79322_Yoris
 https://archive.org/details/tucows_151416_WinEpoc
-
 https://mochasoft.dk/freeware/revo.htm
