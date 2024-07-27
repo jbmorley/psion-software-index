@@ -27,10 +27,6 @@ ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
 
-OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "opolua")
-DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")
-DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
-
 
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
 # being to allow us to make progress with some of the existing libraries.
@@ -68,7 +64,6 @@ LANGUAGE_EMOJI = {
     "pt_PT": "🇵🇹",
 }
 
-
 LIBRARY_INDEXES = [
     "library/epocgames",
     "library/epocgraphics",
@@ -96,7 +91,6 @@ LIBRARY_INDEXES = [
     "library/s7games",
     "library/siena",
 ]
-
 
 LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
 
@@ -144,30 +138,6 @@ class LibraryMetadataProvider(object):
                 return self.descriptions[directory]
             directory = os.path.dirname(directory)
         return None
-
-
-def decode(s, encodings=('ascii', 'utf8', 'latin1', 'cp1252')):
-    for encoding in encodings:
-        try:
-            return s.decode(encoding)
-        except UnicodeDecodeError:
-            pass
-    raise UnicodeDecodeError("Unknown encoding")
-
-
-def find_sibling(path, name):
-    directory_path = os.path.dirname(path)
-    files = os.listdir(directory_path)
-    for f in files:
-        if f.lower() == name.lower():
-            return os.path.join(directory_path, f)
-
-
-def readme_for(path):
-    readme_path = find_sibling(path, "readme.txt")
-    if readme_path:
-        with open(readme_path, "rb") as fh:
-            return decode(fh.read())
 
 
 class Library(object):
@@ -287,6 +257,40 @@ class Collection(object):
         self.installers = installers
 
 
+class Reference(object):
+
+    def __init__(self, parent, path):
+        self.parent = parent
+        self.path = path
+
+    def __str__(self):
+        return os.path.join(self.parent.path, self.path)
+
+
+def decode(s, encodings=('ascii', 'utf8', 'latin1', 'cp1252')):
+    for encoding in encodings:
+        try:
+            return s.decode(encoding)
+        except UnicodeDecodeError:
+            pass
+    raise UnicodeDecodeError("Unknown encoding")
+
+
+def find_sibling(path, name):
+    directory_path = os.path.dirname(path)
+    files = os.listdir(directory_path)
+    for f in files:
+        if f.lower() == name.lower():
+            return os.path.join(directory_path, f)
+
+
+def readme_for(path):
+    readme_path = find_sibling(path, "readme.txt")
+    if readme_path:
+        with open(readme_path, "rb") as fh:
+            return decode(fh.read())
+
+
 def select_icon(icons):
     square_icons = [icon for icon in icons if icon.width == icon.height]
     icons = list(reversed(sorted(icons, key=lambda x: (x.bpp, x.width))))
@@ -334,16 +338,6 @@ def import_installer(library, reference, path):
     summary = library.summary_for(path)
     readme = readme_for(path)
     return Installer(reference, info, shasum(path), icons, summary, readme)
-
-
-class Reference(object):
-
-    def __init__(self, parent, path):
-        self.parent = parent
-        self.path = path
-
-    def __str__(self):
-        return os.path.join(self.parent.path, self.path)
 
 
 def import_apps(library, reference=None, path=None, indent=0):
