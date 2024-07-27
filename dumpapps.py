@@ -33,6 +33,7 @@ BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
 IGNORED = set([
     "netutils.sis",
     "NETUTILS.SIS",
+    "NetUtils.sis",
     "nEzumi 2.sis",
     "RevoSDK.zip",
     "SCOMMSW.SIS",

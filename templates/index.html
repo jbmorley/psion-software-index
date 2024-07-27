@@ -10,7 +10,36 @@
         <h1>Psion Software Index</h1>
         <a href="https://github.com/jbmorley/psion-software-index" target="_blank">GitHub</a>
 
-        <h2>Libraries</h2>
+        <h2>About</h2>
+
+        <p>
+            The Psion Software Index is an attempt to index all the software written for the Psion range of palmtop computers. It is currently primarily focused on EPOC software which includes the Series 5, Series 5mx, Revo, Series 7 and netbook machines, but it also includes some software for the SIBO platform, targeting the Series 3, 3a, 3c, Siena, and 3mx, with more support to be added over time.
+        </p>
+
+        <p>
+            The index is created by extracting metadata from Psion programs that have been preserved on the <a href="https://archive.org" target="_blank">Internet Archive</a> (see <a href="#sources">Sources</a>). The hope is to augment this with manually curated data including descriptions, categorization, and screenshots.
+        </p>
+
+        <p>
+            The current version comprises a static HTML file (which you see here) but the plan is to publish JSON versions of the index to make it easy to build tools for searching the index, viewing entries, and downloading resources based on the references to the original source material. It would be great to have an app store on the Psion someday!
+        </p>
+
+        <p>
+            The index is built by <a href="https://jbmorley.co.uk" target="_blank">Jason Morley</a>, and <a href="https://github.com/tomsci" target="_blank">Tom Sutcliffe</a>, with gentle encouragement from Alex Brown and the <a href="https://discord.gg/8ZkKKkA" target="_blank">Psion Discord</a>, and includes software from the <a href="https://opolua.org" target="_blank">OpoLua</a> OPL on iOS project.
+        </p>
+
+        <h2>Contributing</h2>
+
+        <p>
+            Right now, we're looking for suggestions of Internet Archive items to include in the index, and for help generating screenshots, descriptions, and categorization for the items already the index. It's early days so processes for collection information are pretty unclear right now, but feel free to <a href="https://github.com/jbmorley/psion-software-index/issues" target="_blank">raise a GitHub issue</a> with suggestions or peripheral material to be contributed, or simply <a href="mailto:hello@jbmorley.co.uk">send an email</a>. And, if you have archives of Psion software and you're comfortable doing so, please consider contributing it to the <a href="https://archive.org/create/" target="_blank">Internet Archive</a>.
+        </p>
+
+        <h2><a id="sources" />Sources</h2>
+
+        <p>
+            The index is built from the following sources:
+        </p>
+
         <ul>
             {% for library in libraries %}
                 <li>
