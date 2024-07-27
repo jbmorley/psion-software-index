@@ -13,3 +13,5 @@ sources:
   url: https://archive.org/details/psion_worldonline
 - path: /Users/jbmorley/Software/Psion/Series 5
   name: Series 5 Backups
+- name: Archive
+  path: /Users/jbmorley/Software/Psion/EPOC/Applications
