@@ -23,10 +23,5 @@ https://archive.org/details/tucows_67813_Internettime_German
 https://archive.org/details/tucows_74116_Goby
 https://archive.org/details/tucows_79322_Yoris
 https://archive.org/details/tucows_151416_WinEpoc
-https://archive.org/details/tucows_171771_AgnPrint
-https://archive.org/details/tucows_260548_DXFV
-https://archive.org/details/tucows_296952_EPOC_Network_Utilities
-https://archive.org/details/tucows_296954_EPOC_FTPServer
-https://archive.org/details/tucows_315698_PsiMIDI
-https://archive.org/details/tucows_321799_Dighandler
+
 https://mochasoft.dk/freeware/revo.htm
