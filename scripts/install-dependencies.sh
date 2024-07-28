@@ -25,8 +25,10 @@ set -o pipefail
 set -x
 set -u
 
-ROOT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-ENVIRONMENT_PATH="$ROOT_DIRECTORY/environment.sh"
+SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
+ENVIRONMENT_PATH="$SCRIPTS_DIRECTORY/environment.sh"
 
 if [ -d "$ROOT_DIRECTORY/.local" ] ; then
     rm -r "$ROOT_DIRECTORY/.local"

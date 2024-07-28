@@ -35,7 +35,7 @@ jobs:
         python -m pip install --upgrade pipenv wheel
 
     - name: Install dependencies
-      run: ./install-dependencies.sh
+      run: scripts/install-dependencies.sh
 
     - name: Cache the assets
       uses: actions/cache@v4
@@ -46,7 +46,7 @@ jobs:
 
     - name: Build and test
       run: |
-        ./build.sh
+        scripts/build.sh
         chmod -v -R +rX "_site/"
 
     - name: Upload Pages artifact

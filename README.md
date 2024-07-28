@@ -9,13 +9,13 @@ Tools for generating an index of Psion software
 Install the dependencies:
 
 ```
-./install-dependencies.sh
+./scripts/install-dependencies.sh
 ```
 
 Run the script:
 
 ```
-./build.sh
+./scripts/build.sh
 ```
 
 ## Development

@@ -20,26 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -e
-set -o pipefail
-set -x
-set -u
+SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-ROOT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-ASSETS_DIRECTORY="$ROOT_DIRECTORY/assets"
-ASSETS_LIST_PATH="$ROOT_DIRECTORY/assets.txt"
+ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
 
-source "$ROOT_DIRECTORY/environment.sh"
+export PYTHONUSERBASE="$ROOT_DIRECTORY/.local/python"
+mkdir -p "$PYTHONUSERBASE"
+export PATH="$PYTHONUSERBASE/bin":$PATH
 
-# Generate the asset list from the definition.
-cd "$ROOT_DIRECTORY"
-pipenv run python3 generate-asset-list.py library.yaml
+export TOOLS_DIRECTORY="$ROOT_DIRECTORY/.local/bin"
 
-# Download the assets.
-mkdir -p "$ASSETS_DIRECTORY"
-cd "$ASSETS_DIRECTORY"
-ia download --itemlist "$ASSETS_LIST_PATH"
-
-# Build the index.
-cd "$ROOT_DIRECTORY"
-pipenv run python3 dumpapps.py library.yaml
+export PATH=$PATH:$TOOLS_DIRECTORY
