@@ -42,7 +42,7 @@ jobs:
       with:
         path: |
           assets
-        key: ${{ runner.os }}-${{ hashFiles('library.yaml') }}
+        key: ${{ runner.os }}-${{ hashFiles('libraries/full.yaml') }}
 
     - name: Build and test
       run: |
