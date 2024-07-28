@@ -45,7 +45,8 @@ import yaml
 import opolua
 
 
-ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
 

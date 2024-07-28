@@ -35,7 +35,7 @@ source "$SCRIPTS_DIRECTORY/environment.sh"
 
 # Generate the asset list from the definition.
 cd "$ROOT_DIRECTORY"
-pipenv run python3 generate-asset-list.py library.yaml
+generate-asset-list library.yaml
 
 # Download the assets.
 mkdir -p "$ASSETS_DIRECTORY"
@@ -44,4 +44,4 @@ ia download --itemlist "$ASSETS_LIST_PATH"
 
 # Build the index.
 cd "$ROOT_DIRECTORY"
-pipenv run python3 dumpapps.py library.yaml
+dumpapps library.yaml

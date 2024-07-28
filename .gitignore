@@ -1,4 +1,6 @@
-.local
+/.local
 /_site
 /assets
 /assets.txt
+
+__pycache__

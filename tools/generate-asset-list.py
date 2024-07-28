@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
 # Copyright (c) 2024 Jason Morley
 #
@@ -20,26 +20,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -e
-set -o pipefail
-set -x
-set -u
+import argparse
+import os
+import urllib.parse
+import yaml
 
-SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
+ASSETS_PATH = os.path.join(ROOT_DIRECTORY, "assets.txt")
 
-ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
-TOOLS_DIRECTORY="$ROOT_DIRECTORY/tools"
-ENVIRONMENT_PATH="$SCRIPTS_DIRECTORY/environment.sh"
 
-if [ -d "$ROOT_DIRECTORY/.local" ] ; then
-    rm -r "$ROOT_DIRECTORY/.local"
-fi
-source "$ENVIRONMENT_PATH"
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("definition")
+    options = parser.parse_args()
 
-# Install the Python dependencies
-PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
+    with open(options.definition) as fh:
+        definition = yaml.safe_load(fh)
 
-# Install Internet Archive tools
-mkdir -p "$BIN_DIRECTORY"
-curl -L https://archive.org/download/ia-pex/ia -o "$BIN_DIRECTORY/ia"
-chmod +x "$BIN_DIRECTORY/ia"
+    assets = []
+    for source in definition["sources"]:
+        if "url" not in source or not source["url"].startswith("https://archive.org/details/"):
+            continue
+        url = urllib.parse.urlparse(source["url"])
+        assets.append(os.path.split(url.path)[-1])
+
+    assets.sort()
+
+    with open(ASSETS_PATH, "w") as fh:
+        for asset in assets:
+            fh.write(asset)
+            fh.write("\n")
+
+
+if __name__ == "__main__":
+    main()

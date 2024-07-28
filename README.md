@@ -9,21 +9,28 @@ Tools for generating an index of Psion software
 Install the dependencies:
 
 ```
-./scripts/install-dependencies.sh
+scripts/install-dependencies.sh
 ```
 
 Run the script:
 
 ```
-./scripts/build.sh
+scripts/build.sh
 ```
+
+## Tools
+
+The individual tools used to generate the index are located in the 'tools' directory:
+
+- `generate-asset-list`—generate a text file that can be used by the Internet Archive downloader (`ia`) for a specific library definition
+- `dumpapps`—generate the HTML index for a given library (assumes all referenced assets are available locally)
 
 ## Development
 
 For development, it can be useful to be able to run the indexer on a smaller library. For example,
 
 ```
-./dumpapps library_small.yaml
+tools/dumpapps library_small.yaml
 ```
 
 N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally.
