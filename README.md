@@ -1,10 +1,32 @@
 # Psion Software Index
 
-Script for generating an index of a directory of EPOC32 SIS files
+[![build](https://github.com/jbmorley/psion-software-index/actions/workflows/build.yaml/badge.svg)](https://github.com/jbmorley/psion-software-index/actions/workflows/build.yaml)
 
-## Status
+Tools for generating an index of Psion software
 
-This code is at a very early proof-of-concept stage of discovery and development. My current thinking is that it could grow into something with a definition file listing known sources (Internet Archive, etc) of Psion software and generate a user friendly searchable index.
+## Usage
+
+Install the dependencies:
+
+```
+./install-dependencies.sh
+```
+
+Run the script:
+
+```
+./build.sh
+```
+
+## Development
+
+For development, it can be useful to be able to run the indexer on a smaller library. For example,
+
+```
+./dumpapps library_small.yaml
+```
+
+N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally.
 
 ## Contributing
 
