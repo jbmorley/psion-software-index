@@ -28,9 +28,11 @@ import contextlib
 import csv
 import glob
 import hashlib
+import logging
 import os
 import re
 import shutil
+import sys
 import tempfile
 import urllib.parse
 import uuid
@@ -46,6 +48,9 @@ import opolua
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
+
+verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
+logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
 
 
 # These SIS files currently cause issues with the extraction tools we're using so they're being ignored for the time
@@ -150,7 +155,7 @@ class LibraryMetadataProvider(object):
                     application_path = os.path.join(path, index_path, match.group(1)).lower()
                     self.descriptions[application_path] = match.group(3)
                     if not os.path.exists(application_path):
-                        print("WARN: Misisng application path", application_path)
+                        logging.warning("WARN: Misisng application path", application_path)
 
     def summary_for(self, path):
         directory = os.path.dirname(path).lower()
@@ -331,7 +336,7 @@ def select_name(names):
     for language in LANGUAGE_ORDER:
         if language in names:
             return names[language]
-    print(names)
+    logging.effort("Failed to select a name from candidates '%s'.", names)
     exit("Unable to find language")
 
 
@@ -366,7 +371,7 @@ def import_apps(library, reference=None, path=None, indent=0):
     path = path if path else library.path
     apps = []
 
-    print(" " * indent + f"Importing library '{path}'...")
+    logging.info(" " * indent + f"Importing library '{path}'...")
     for root, dirs, files in os.walk(path):
         file_paths = [os.path.join(root, f) for f in files]
         for file_path in file_paths:
@@ -380,7 +385,7 @@ def import_apps(library, reference=None, path=None, indent=0):
 
             elif ext == ".app":
 
-                print(" " * indent + f"Importing app '{file_path}'...")
+                logging.info(" " * indent + f"Importing app '{file_path}'...")
                 aif_path = find_sibling(file_path, name + ".aif")
                 uid = str(uuid.uuid4())
                 icons = []
@@ -397,29 +402,28 @@ def import_apps(library, reference=None, path=None, indent=0):
 
             elif ext == ".sis":
 
-                print(" " * indent + f"Importing installer '{file_path}'...")
+                logging.info(" " * indent + f"Importing installer '{file_path}'...")
                 try:
-                    # reference = Reference(parent=library, path=rel_path)
                     apps.append(import_installer(library=library,
                                                  reference=reference + [rel_path],
                                                  path=file_path))
                 except opolua.InvalidInstaller as e:
-                    print(e)
+                    logging.error("Failed to import installer with message '%s", e)
 
             elif ext == ".zip":
 
-                print(" " * indent + f"Importing zip '{file_path}'...")
+                logging.info(" " * indent + f"Importing zip '{file_path}'...")
                 try:
                     with Zip(file_path) as contents_path:
                         apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
                 except NotImplementedError as e:
-                    print(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
+                    logging.info(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
                 except zipfile.BadZipFile as e:
-                    print(" " * indent + f"Corrupt zip file '{file_path}', {e}.")
+                    logging.info(" " * indent + f"Corrupt zip file '{file_path}', {e}.")
 
             elif ext == ".iso":
 
-                print(" " * indent + f"Importing ISO '{file_path}'...")
+                logging.info(" " * indent + f"Importing ISO '{file_path}'...")
                 with Iso(file_path) as contents_path:
                     apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
 
@@ -496,7 +500,7 @@ class Iso(object):
         self.temporary_directory = tempfile.TemporaryDirectory()
 
     def __enter__(self):
-        print(f"Opening ISO file '{self.path}'...")
+        logging.info(f"Opening ISO file '{self.path}'...")
         self.pwd = os.getcwd()
         self.temporary_directory = tempfile.TemporaryDirectory()
         os.chdir(self.temporary_directory.name)
@@ -511,6 +515,7 @@ class Iso(object):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("definition")
+    parser.add_argument('--verbose', '-v', action='store_true', default=False, help="Show verbose output.")
     options = parser.parse_args()
 
     with open(options.definition) as fh:

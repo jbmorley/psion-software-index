@@ -53,7 +53,7 @@ def run_json_command(command, path):
     stderr = result.stderr.decode('utf-8')
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
-        raise InvalidInstaller(stderr)
+        raise InvalidInstaller(stdout + stderr)
 
     # Check the return code.
     # It might be nicer to mark
