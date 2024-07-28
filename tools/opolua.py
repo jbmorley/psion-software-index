@@ -28,7 +28,7 @@ import tempfile
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
-OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "opolua")
+OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "dependencies", "opolua")
 DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")
 DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
 

@@ -1,3 +1,3 @@
 [submodule "opolua"]
-	path = opolua
+	path = dependencies/opolua
 	url = https://github.com/inseven/opolua.git
