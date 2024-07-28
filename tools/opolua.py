@@ -33,9 +33,14 @@ DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")
 DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
 
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
+NOT_AN_AI_MESSAGE = "Not an AIF file"
 
 
 class InvalidInstaller(Exception):
+    pass
+
+
+class InvalidAIF(Exception):
     pass
 
 
@@ -55,6 +60,8 @@ def run_json_command(command, path):
 
     if UNSUPPORTED_MESSAGE in stdout + stderr:
         raise InvalidInstaller(stdout + stderr)
+    elif NOT_AN_AI_MESSAGE in stdout + stderr:
+        raise InvalidAIF(stdout + stderr)
 
     # Check the return code.
     # It might be nicer to mark

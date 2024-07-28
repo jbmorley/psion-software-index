@@ -396,6 +396,15 @@ def import_apps(library, reference=None, path=None, indent=0):
                     uid = ("0x%08x" % info["uid3"]).lower()
                     name = select_name(info["captions"])
                     icons = opolua.get_icons(aif_path)
+                else:
+                    try:
+                        info = opolua.dumpaif(file_path)
+                        icons = opolua.get_icons(file_path)
+                        name = select_name(info["captions"])
+                    except opolua.InvalidAIF:
+                        pass
+                    except BaseException as e:
+                        logging.warning("Failed to parse APP as AIF with message '%s'", e)
                 summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
                 installer = App(reference + [rel_path], uid, shasum(file_path), name, icons, summary, readme)
