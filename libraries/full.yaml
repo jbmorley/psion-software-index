@@ -6,37 +6,25 @@ sources:
   path: assets/3-libjune-05
   url: https://archive.org/details/3-libjune-05
 
-- name: PSION CD - Volume 1 ver 2.0
-  path: assets/psioncdvol1
-  url: https://archive.org/details/psioncdvol1
-
-- name: PSION CD - Volume 2 ver 2.1
-  url: https://archive.org/details/psioncdvol2
-  path: assets/psioncdvol2
+- name: AgnPrint
+  path: assets/tucows_171771_AgnPrint
+  url: https://archive.org/details/tucows_171771_AgnPrint
 
 - name: Alignment
   path: assets/tucows_228843_Alignment
   url: https://archive.org/details/tucows_228843_Alignment
 
-- name: Emu48E
-  path: assets/tucows_308303_Emu48E
-  url: https://archive.org/details/tucows_308303_Emu48E
-
-- name: Pebbles on the move
-  path: assets/tucows_325813_Pebbles_on_the_move
-  url: https://archive.org/details/tucows_325813_Pebbles_on_the_move
-
-- name: Speaker
-  path: assets/tucows_322115_Speaker
-  url: https://archive.org/details/tucows_322115_Speaker
-
 - name: Dighandler
   path: assets/tucows_321799_Dighandler
   url: https://archive.org/details/tucows_321799_Dighandler
 
-- name: PsiMIDI
-  path: assets/tucows_315698_PsiMIDI
-  url: https://archive.org/details/tucows_315698_PsiMIDI
+- name: DXFV
+  path: assets/tucows_260548_DXFV
+  url: https://archive.org/details/tucows_260548_DXFV
+
+- name: Emu48E
+  path: assets/tucows_308303_Emu48E
+  url: https://archive.org/details/tucows_308303_Emu48E
 
 - name: EPOC FTPServer
   path: assets/tucows_296954_EPOC_FTPServer
@@ -46,10 +34,42 @@ sources:
   path: assets/tucows_296952_EPOC_Network_Utilities
   url: https://archive.org/details/tucows_296952_EPOC_Network_Utilities
 
-- name: DXFV
-  path: assets/tucows_260548_DXFV
-  url: https://archive.org/details/tucows_260548_DXFV
+- name: Golf Pro (Enhanced)
+  path: assets/tucows_6844_Golf_Pro_Enhanced
+  url: https://archive.org/details/tucows_6844_Golf_Pro_Enhanced
 
-- name: AgnPrint
-  path: assets/tucows_171771_AgnPrint
-  url: https://archive.org/details/tucows_171771_AgnPrint
+- name: Lingo
+  path: assets/tucows_165646_Lingo
+  url: https://archive.org/details/tucows_165646_Lingo
+
+- name: Palmtop PSION 5 Street Planner 99
+  path: assets/streetplanner99
+  url: https://archive.org/details/streetplanner99
+
+- name: Pebbles on the move
+  path: assets/tucows_325813_Pebbles_on_the_move
+  url: https://archive.org/details/tucows_325813_Pebbles_on_the_move
+
+- name: PsiBlocks
+  path: assets/tucows_31661_PsiBlocks
+  url: https://archive.org/details/tucows_31661_PsiBlocks
+
+- name: PsiMIDI
+  path: assets/tucows_315698_PsiMIDI
+  url: https://archive.org/details/tucows_315698_PsiMIDI
+
+- name: PSION CD - Volume 1 ver 2.0
+  path: assets/psioncdvol1
+  url: https://archive.org/details/psioncdvol1
+
+- name: PSION CD - Volume 2 ver 2.1
+  path: assets/psioncdvol2
+  url: https://archive.org/details/psioncdvol2
+
+- name: Setclock
+  path: assets/tucows_11029_Setclock
+  url: https://archive.org/details/tucows_11029_Setclock
+
+- name: Speaker
+  path: assets/tucows_322115_Speaker
+  url: https://archive.org/details/tucows_322115_Speaker
