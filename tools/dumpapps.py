@@ -39,6 +39,8 @@ import urllib.parse
 import uuid
 import zipfile
 
+from enum import Enum
+
 import pycdlib
 import yaml
 
@@ -126,6 +128,10 @@ LIBRARY_INDEXES = [
 
 LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
 
+
+class ReleaseKind(Enum):
+    INSTALLER = "installer"
+    APP = "app"
 
 class Chdir(object):
 
@@ -229,9 +235,10 @@ class Version(object):
 
 class Application(object):
 
-    def __init__(self, uid, installers):
+    def __init__(self, uid, installers, screenshots):
         self.uid = uid
         self.installers = installers
+        self.screenshots = screenshots
         versions = collections.defaultdict(list)
         for installer in installers:
             versions[installer.version].append(installer)
@@ -297,8 +304,9 @@ class ReferenceItem(object):
 class Release(object):
 
     # TODO: Rename UID to identifier everywhere.
-    def __init__(self, reference, identifier, sha256, name, version, icons, summary, readme):
+    def __init__(self, reference, kind, identifier, sha256, name, version, icons, summary, readme):
         self.reference = reference
+        self.kind = kind
         self.uid = identifier
         self.sha256 = sha256
         self.name = name
@@ -311,6 +319,7 @@ class Release(object):
     def as_dict(self):
         dict = {
             'reference': reference_as_dicts(self.reference),
+            'kind': self.kind.value,
             'sha256': self.sha256,
             'uid': self.uid,
             'name': self.name,
@@ -416,6 +425,7 @@ def import_installer(library, reference, path):
     summary = library.summary_for(path)
     readme = readme_for(path)
     return Release(reference=reference,
+                   kind=ReleaseKind.INSTALLER,
                    identifier="0x%08x" % info["uid"],
                    sha256=shasum(path),
                    name=select_name(info["name"]),
@@ -466,6 +476,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                 summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
                 release = Release(reference=reference + [ReferenceItem(rel_path)],
+                                  kind=ReleaseKind.APP,
                                   identifier=uid,
                                   sha256=shasum(file_path),
                                   name=name,
@@ -631,8 +642,8 @@ def main():
                       sha_count=len(unique_shas))
 
     applications = []
-    for uid, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
-        applications.append(Application(uid, installers))
+    for identifier, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
+        applications.append(Application(identifier, installers, []))
 
     os.makedirs(DATA_DIRECTORY, exist_ok=True)
 

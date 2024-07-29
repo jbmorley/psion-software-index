@@ -53,6 +53,7 @@ layout: full
                                         {% endif %}
                                     {% endfor %}
                                 </div>
+                                <div>{{ installer.kind }}</div>
                             {% endfor %}
                         </li>
                     {% endfor %}
