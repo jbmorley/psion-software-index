@@ -29,6 +29,7 @@ SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 
 ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
 ASSETS_DIRECTORY="$ROOT_DIRECTORY/assets"
+SITE_DIRECTORY="$ROOT_DIRECTORY/site"
 ASSETS_LIST_PATH="$ROOT_DIRECTORY/assets.txt"
 LIBRARY_PATH="$ROOT_DIRECTORY/libraries/full.yaml"
 
@@ -46,3 +47,7 @@ ia download --itemlist "$ASSETS_LIST_PATH"
 # Build the index.
 cd "$ROOT_DIRECTORY"
 dumpapps "$LIBRARY_PATH"
+
+# Build the site.
+cd "$SITE_DIRECTORY"
+bundle exec jekyll build

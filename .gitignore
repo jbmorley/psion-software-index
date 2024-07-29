@@ -2,5 +2,7 @@
 /_site
 /assets
 /assets.txt
+/site/_data
 
+.jekyll-cache
 __pycache__

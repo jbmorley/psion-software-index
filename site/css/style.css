@@ -1,0 +1,224 @@
+:root {
+    --foreground-color: #000;
+    --background-color: #fff;
+    --secondary-background-color: rgb(246, 246, 246);
+    --link-color: orange;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --foreground-color: #fff;
+        --background-color: #171616;
+        --secondary-background-color: rgb(33, 32, 33);
+        --link-color: orange;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    text-align: center;
+    margin: 0;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    color: var(--foreground-color);
+    background-color: var(--background-color);
+}
+
+header nav {
+    text-align: center;
+    font-weight: 300;
+}
+
+header ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.5em;
+}
+
+header ul li {
+    display: inline-block;
+    padding: 1em 0.5em;
+}
+
+header nav a {
+    display: inline-block;
+}
+
+h1, h2, h3 {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    text-align: center;
+}
+
+.content, footer {
+    text-align: left;
+    max-width: 720px;
+    margin: auto;
+    font-weight: 200;
+    line-height: 1.4em;
+}
+
+.content.full {
+    max-width: initial;
+}
+
+@media (max-width: 760px) {
+    .content {
+        margin: 2rem;
+    }
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container a {
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    margin: 3rem auto 1rem auto;
+    font-weight: 100;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+footer nav ul li {
+    display: inline;
+    margin-right: 0.5em;
+}
+
+table.statistics {
+    margin: auto;
+}
+
+.stat {
+    font-weight: bold;
+}
+
+
+/* Library */
+
+
+.sha, .uid {
+    font-family: monospace;
+}
+
+.icon {
+    width: 48px;
+    image-rendering: pixelated;
+}
+
+ul.applications {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    margin: 1rem;
+}
+
+@media screen and (max-width: 1000px) {
+    ul.applications {
+        grid-template-columns: 1fr;
+    }
+}
+
+ul.applications > li {
+    padding: 2rem;
+    border-radius: 1rem;
+    background-color: #fff;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+}
+
+.application-header {
+    border-bottom: 1px solid #eee;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    align-items: baseline;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.application-header img {
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.application-name {
+    font-size: 1.6rem;
+}
+
+.application-identifier {
+    text-align: right;
+    font-family: monospace;
+    color: #ccc;
+}
+
+.summary {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+}
+
+.readme {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+a.install {
+    color: orange;
+    background-color: #eee;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.6em 1em;
+    display: inline-block;
+    border-radius: 2em;
+}
+
+.readme-contents {
+    white-space: pre-wrap;
+    font-family: monospace;
+    background-color: #eee;
+    border-radius: 0.5rem;
+    padding: 2rem;
+}
+
+.version-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: baseline;
+}
+
+.version-name {
+    font-size: 1.2rem;
+}
+
+.version-details {
+    text-align: right;
+    font-variant: small-caps;
+}
+
+.path {
+    font-family: monospace;
+    word-break: break-all;
+}
+

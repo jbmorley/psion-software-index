@@ -29,6 +29,7 @@ SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 
 ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
 TOOLS_DIRECTORY="$ROOT_DIRECTORY/tools"
+SITE_DIRECTORY="$ROOT_DIRECTORY/site"
 ENVIRONMENT_PATH="$SCRIPTS_DIRECTORY/environment.sh"
 
 if [ -d "$ROOT_DIRECTORY/.local" ] ; then
@@ -38,6 +39,11 @@ source "$ENVIRONMENT_PATH"
 
 # Install the Python dependencies
 PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
+
+# Install the Ruby dependencies
+gem install bundler
+cd "$SITE_DIRECTORY"
+bundle install
 
 # Install Internet Archive tools
 mkdir -p "$BIN_DIRECTORY"

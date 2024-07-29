@@ -28,6 +28,7 @@ import contextlib
 import csv
 import glob
 import hashlib
+import json
 import logging
 import os
 import re
@@ -38,7 +39,6 @@ import urllib.parse
 import uuid
 import zipfile
 
-import jinja2
 import pycdlib
 import yaml
 
@@ -48,7 +48,11 @@ import opolua
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
-BUILD_DIRECTORY = os.path.join(ROOT_DIRECTORY, "_site")
+
+SITE_DIRECTORY = os.path.join(ROOT_DIRECTORY, "site")
+SUMMARY_PATH = os.path.join(SITE_DIRECTORY, "_data", "summary.json")
+SOURCES_PATH = os.path.join(SITE_DIRECTORY, "_data", "sources.json")
+LIBRARY_PATH = os.path.join(SITE_DIRECTORY, "_data", "library.json")
 
 verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
@@ -167,6 +171,7 @@ class LibraryMetadataProvider(object):
         return None
 
 
+# TODO: Rename to source!
 class Library(object):
 
     def __init__(self, path, name, url, metadata_provider):
@@ -178,6 +183,13 @@ class Library(object):
     def summary_for(self, path):
         return self.metadata_provider.summary_for(path)
 
+    def as_dict(self):
+        return {
+            'path': self.path,
+            'name': self.name,
+            'url': self.url,
+        }
+
 
 class Summary(object):
 
@@ -187,7 +199,16 @@ class Summary(object):
         self.version_count = version_count
         self.sha_count = sha_count
 
+    def as_dict(self):
+        return {
+            'installerCount': self.installer_count,
+            'uidCount': self.uid_count,
+            'versionCount': self.version_count,
+            'shaCount': self.sha_count,
+        }
 
+
+# TODO: Consider replacing with Collection
 class Version(object):
 
     def __init__(self, installers):
@@ -197,6 +218,12 @@ class Version(object):
     @property
     def version(self):
         return self.installers[0].version
+
+    def as_dict(self):
+        return {
+            'version': self.version,
+            'variants': [variant.as_dict() for variant in self.variants],
+        }
 
 
 class Application(object):
@@ -228,7 +255,45 @@ class Application(object):
         return select_icon([installer.icon for installer in self.installers
                             if installer.icon])
 
+    def as_dict(self):
+        dict = {
+            'uid': self.uid,
+            'name': self.name,
+            'summary': self.summary,
+            'versions': [version.as_dict() for version in self.versions],
+        }
+        summary = self.summary
+        if summary:
+            dict['summary'] = summary
+        readme = self.readme  # TODO: Rename to description
+        if readme:
+            dict['readme'] = readme
+        icon = self.icon
+        if icon:
+            dict['iconData'] = icon.data
+        return dict
 
+
+# TODO: This feels messy. Maybe the reference really should be a class?
+def reference_as_dicts(reference):
+    return [item.as_dict() for item in reference]
+
+
+# TODO: Add additional information into the reference item (e.g., type, identifier)
+#       A reference should be able to find the referenced item without any further information.
+class ReferenceItem(object):
+
+    def __init__(self, path):
+        self.path = path
+
+    def as_dict(self):
+        return {
+            'path': self.path,
+            'name': self.path,
+        }
+
+
+# TODO: Unify installer and app as 'instance' with a type?
 class Installer(object):
 
     def __init__(self, reference, details, sha256, icons, summary, readme):
@@ -238,50 +303,68 @@ class Installer(object):
         self.icons = icons
         self.summary = summary
         self.readme = readme
-        self.uuid = str(uuid.uuid4())  # TODO: Is this ever used? <------ remove me
         self.uid = "0x%08x" % self._details["uid"]
+        self.name = select_name(self._details["name"])
         self.version = self._details["version"]
+        self.icon = select_icon(self.icons)
         self.full_path = str(reference)
+        self.install_url = "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path}, quote_via=urllib.parse.quote)
         self.language_emoji = "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
 
-    @property
-    def name(self):
-        return select_name(self._details["name"])
-
-    @property
-    def icon(self):
-        return select_icon(self.icons)
-
-    @property
-    def install_url(self):
-        return "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path}, quote_via=urllib.parse.quote)
-
+    def as_dict(self):
+        dict = {
+            'reference': reference_as_dicts(self.reference),
+            'sha256': self.sha256,
+            'uid': self.uid,
+            'name': self.name,
+            'version': self.version,
+        }
+        icon = self.icon
+        if icon:
+            dict['iconData'] = self.icon.data
+        return dict
 
 class App(object):
 
+    # TODO: Rename UID to identifier everywhere.
     def __init__(self, reference, identifier, sha256, name, icons, summary, readme):
         self.reference = reference
-        self.identifier = identifier
         self.sha256 = sha256
+        self.uid = identifier
         self.name = name
         self.icons = icons
         self.summary = summary
         self.readme = readme
-        self.version = "Unknown Version"
-        self.language_emoji = "Unknown Language"
-        self.full_path = str(reference)
-        self.uid = self.identifier
+        self.version = "Unknown"
+        self.language_emoji = ""
+        self.full_path = str(reference)  # TODO: Is this ever used?? REMOVE!
+        self.icon = select_icon(self.icons)
 
-    @property
-    def icon(self):
-        return select_icon(self.icons)
+    def as_dict(self):
+        dict = {
+            'reference': reference_as_dicts(self.reference),
+            'sha256': self.sha256,
+            'uid': self.uid,
+            'name': self.name,
+            'version': self.version,
+        }
+        icon = self.icon
+        if icon:
+            dict['iconData'] = self.icon.data
+        return dict
 
 
 class Collection(object):
 
     def __init__(self, identifier, installers):
         self.identifier = identifier
-        self.installers = installers
+        self.installers = installers  # TODO: Rename to items?
+
+    def as_dict(self):
+        return {
+            'identifier': self.identifier,
+            'installers': [installer.as_dict() for installer in self.installers],
+        }
 
 
 class Reference(object):
@@ -407,7 +490,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                         logging.warning("Failed to parse APP as AIF with message '%s'", e)
                 summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
-                installer = App(reference + [rel_path], uid, shasum(file_path), name, icons, summary, readme)
+                installer = App(reference + [ReferenceItem(rel_path)], uid, shasum(file_path), name, icons, summary, readme)
                 apps.append(installer)
 
             elif ext == ".sis":
@@ -415,7 +498,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                 logging.info(" " * indent + f"Importing installer '{file_path}'...")
                 try:
                     apps.append(import_installer(library=library,
-                                                 reference=reference + [rel_path],
+                                                 reference=reference + [ReferenceItem(rel_path)],
                                                  path=file_path))
                 except opolua.InvalidInstaller as e:
                     logging.error("Failed to import installer with message '%s", e)
@@ -425,7 +508,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                 logging.info(" " * indent + f"Importing zip '{file_path}'...")
                 try:
                     with Zip(file_path) as contents_path:
-                        apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
+                        apps.extend(import_apps(library, reference + [ReferenceItem(rel_path)], contents_path, indent=indent+2))
                 except NotImplementedError as e:
                     logging.info(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
                 except zipfile.BadZipFile as e:
@@ -435,7 +518,7 @@ def import_apps(library, reference=None, path=None, indent=0):
 
                 logging.info(" " * indent + f"Importing ISO '{file_path}'...")
                 with Iso(file_path) as contents_path:
-                    apps.extend(import_apps(library, reference + [rel_path], contents_path, indent=indent+2))
+                    apps.extend(import_apps(library, reference + [ReferenceItem(rel_path)], contents_path, indent=indent+2))
 
     return apps
 
@@ -531,10 +614,6 @@ def main():
     with open(options.definition) as fh:
         definition = yaml.safe_load(fh)
 
-    loader = jinja2.FileSystemLoader(TEMPLATES_DIRECTORY)
-    environment = jinja2.Environment(loader=loader)
-    template = environment.get_template("index.html")
-
     libraries = []
     installers = []
     for source in definition["sources"]:
@@ -573,19 +652,17 @@ def main():
     for uid, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
         applications.append(Application(uid, installers))
 
-    if os.path.exists(BUILD_DIRECTORY):
-        shutil.rmtree(BUILD_DIRECTORY)
+    logging.info("Writing summary...")
+    with open(SUMMARY_PATH, "w") as fh:
+        json.dump(summary.as_dict(), fh)
 
-    os.mkdir(BUILD_DIRECTORY)
+    logging.info("Writing sources...")
+    with open(SOURCES_PATH, "w") as fh:
+        json.dump([library.as_dict() for library in libraries], fh)
 
-    shutil.copyfile(os.path.join(ROOT_DIRECTORY, "css", "main.css"),
-                    os.path.join(BUILD_DIRECTORY, "main.css"))
-
-    with open(os.path.join(BUILD_DIRECTORY, "index.html"), "w") as fh:
-        fh.write(template.render(options=definition["options"],
-                                 libraries=libraries,
-                                 summary=summary,
-                                 applications=applications))
+    logging.info("Writing the library...")
+    with open(LIBRARY_PATH, "w", encoding="utf-8") as fh:
+        json.dump([application.as_dict() for application in applications], fh)
 
 
 if __name__ == "__main__":
