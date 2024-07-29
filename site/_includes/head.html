@@ -4,6 +4,6 @@
     <title>{{ site.title }}{% if page.title %} – {{ page.title }}{% endif %}</title>
     {% if page.description %}<meta name="description" content="{{ page.description }}">{% endif %}
     {% if site.author %}<meta name="author" content="{{ site.author }}">{% endif %}
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="{{ "/css/style.css" | absolute_url }}">
     <meta property="og:title" content="{{ site.title }}{% if page.title %} - {{ page.title }}{% endif %}">
 </head>
