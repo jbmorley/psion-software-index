@@ -446,7 +446,7 @@ def import_apps(library, reference=None, path=None, indent=0):
 
                 logging.info(" " * indent + f"Importing app '{file_path}'...")
                 aif_path = find_sibling(file_path, name + ".aif")
-                uid = str(uuid.uuid4())
+                uid = shasum(file_path)
                 icons = []
                 name = os.path.basename(rel_path)
                 if aif_path:

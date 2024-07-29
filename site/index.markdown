@@ -16,7 +16,7 @@ layout: full
                     {{ application.name }}
                 </div>
                 <div class="application-identifier">
-                    {{ application.uid }}
+                    {{ application.uid | truncate: 10 }}
                 </div>
             </div>
             {% if application.summary %}
