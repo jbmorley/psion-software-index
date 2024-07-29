@@ -1,0 +1,14 @@
+title: Psion Software Index
+author: Jason Morley
+email: support@jbmorley.co.uk
+description: ""
+baseurl: ""
+url: "https://jbmorley.github.io/psion-software-index/"
+
+plugins:
+  - jekyll-feed
+destination: ../_site
+
+defaults:
+  - values:
+      layout: "default"
