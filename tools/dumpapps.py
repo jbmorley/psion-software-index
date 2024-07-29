@@ -294,51 +294,18 @@ class ReferenceItem(object):
         }
 
 
-# TODO: Unify installer and app as 'instance' with a type?
-class Installer(object):
-
-    def __init__(self, reference, details, sha256, icons, summary, readme):
-        self.reference = reference
-        self._details = details
-        self.sha256 = sha256
-        self.icons = icons
-        self.summary = summary
-        self.readme = readme
-        self.uid = "0x%08x" % self._details["uid"]
-        self.name = select_name(self._details["name"])
-        self.version = self._details["version"]
-        self.icon = select_icon(self.icons)
-        self.full_path = str(reference)
-        self.install_url = "x-reconnect://install/?" + urllib.parse.urlencode({"path": "file://" + self.full_path}, quote_via=urllib.parse.quote)
-        self.language_emoji = "".join([LANGUAGE_EMOJI[language] for language in self._details["name"].keys()])
-
-    def as_dict(self):
-        dict = {
-            'reference': reference_as_dicts(self.reference),
-            'sha256': self.sha256,
-            'uid': self.uid,
-            'name': self.name,
-            'version': self.version,
-        }
-        icon = self.icon
-        if icon:
-            dict['iconData'] = self.icon.data
-        return dict
-
-class App(object):
+class Release(object):
 
     # TODO: Rename UID to identifier everywhere.
-    def __init__(self, reference, identifier, sha256, name, icons, summary, readme):
+    def __init__(self, reference, identifier, sha256, name, version, icons, summary, readme):
         self.reference = reference
-        self.sha256 = sha256
         self.uid = identifier
+        self.sha256 = sha256
         self.name = name
+        self.version = version
         self.icons = icons
         self.summary = summary
         self.readme = readme
-        self.version = "Unknown"
-        self.language_emoji = ""
-        self.full_path = str(reference)  # TODO: Is this ever used?? REMOVE!
         self.icon = select_icon(self.icons)
 
     def as_dict(self):
@@ -448,7 +415,14 @@ def import_installer(library, reference, path):
                 icons = opolua.get_icons(aif_path)
     summary = library.summary_for(path)
     readme = readme_for(path)
-    return Installer(reference, info, shasum(path), icons, summary, readme)
+    return Release(reference=reference,
+                   identifier="0x%08x" % info["uid"],
+                   sha256=shasum(path),
+                   name=select_name(info["name"]),
+                   version=info["version"],
+                   icons=icons,
+                   summary=summary,
+                   readme=readme)
 
 
 def import_apps(library, reference=None, path=None, indent=0):
@@ -491,8 +465,15 @@ def import_apps(library, reference=None, path=None, indent=0):
                         logging.warning("Failed to parse APP as AIF with message '%s'", e)
                 summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
-                installer = App(reference + [ReferenceItem(rel_path)], uid, shasum(file_path), name, icons, summary, readme)
-                apps.append(installer)
+                release = Release(reference=reference + [ReferenceItem(rel_path)],
+                                  identifier=uid,
+                                  sha256=shasum(file_path),
+                                  name=name,
+                                  version="Unknown",
+                                  icons=icons,
+                                  summary=summary,
+                                  readme=readme)
+                apps.append(release)
 
             elif ext == ".sis":
 

@@ -53,9 +53,6 @@ layout: full
                                         {% endif %}
                                     {% endfor %}
                                 </div>
-                                {% if options.show_install_buttons %}
-                                    <a class="install" href="{{ installer.installUrl }}">Install</a>
-                                {% endif %}
                             {% endfor %}
                         </li>
                     {% endfor %}
