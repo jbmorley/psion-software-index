@@ -50,9 +50,10 @@ ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 
 SITE_DIRECTORY = os.path.join(ROOT_DIRECTORY, "site")
-SUMMARY_PATH = os.path.join(SITE_DIRECTORY, "_data", "summary.json")
-SOURCES_PATH = os.path.join(SITE_DIRECTORY, "_data", "sources.json")
-LIBRARY_PATH = os.path.join(SITE_DIRECTORY, "_data", "library.json")
+DATA_DIRECTORY = os.path.join(SITE_DIRECTORY, "_data")
+SUMMARY_PATH = os.path.join(DATA_DIRECTORY, "summary.json")
+SOURCES_PATH = os.path.join(DATA_DIRECTORY, "sources.json")
+LIBRARY_PATH = os.path.join(DATA_DIRECTORY, "library.json")
 
 verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
@@ -651,6 +652,8 @@ def main():
     applications = []
     for uid, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
         applications.append(Application(uid, installers))
+
+    os.makedirs(DATA_DIRECTORY, exist_ok=True)
 
     logging.info("Writing summary...")
     with open(SUMMARY_PATH, "w") as fh:
