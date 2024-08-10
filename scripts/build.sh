@@ -46,7 +46,7 @@ ia download --itemlist "$ASSETS_LIST_PATH"
 
 # Build the index.
 cd "$ROOT_DIRECTORY"
-dumpapps "$LIBRARY_PATH"
+indexer "$LIBRARY_PATH"
 
 # Build the site.
 cd "$SITE_DIRECTORY"
