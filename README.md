@@ -23,14 +23,14 @@ scripts/build.sh
 The individual tools used to generate the index are located in the 'tools' directory:
 
 - `generate-asset-list`—generate a text file that can be used by the Internet Archive downloader (`ia`) for a specific library definition
-- `dumpapps`—generate the HTML index for a given library (assumes all referenced assets are available locally)
+- `indexer`—generate the HTML index for a given library (assumes all referenced assets are available locally)
 
 ## Development
 
 For development, it can be useful to be able to run the indexer on a smaller library. For example,
 
 ```
-tools/dumpapps libraries/small.yaml
+tools/indexer libraries/small.yaml
 ```
 
 N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally.
