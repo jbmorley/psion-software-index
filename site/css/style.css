@@ -1,7 +1,8 @@
 :root {
     --foreground-color: #000;
-    --background-color: #fff;
-    --secondary-background-color: rgb(246, 246, 246);
+    --background-color: rgb(246, 246, 246);
+    --secondary-background-color: #fff;
+    --divider-color: #eee;
     --link-color: orange;
 }
 
@@ -11,6 +12,7 @@
         --foreground-color: #fff;
         --background-color: #171616;
         --secondary-background-color: rgb(33, 32, 33);
+        --divider-color: #3e3e3e;
         --link-color: orange;
     }
 }
@@ -145,12 +147,12 @@ ul.applications {
 ul.applications > li {
     padding: 2rem;
     border-radius: 1rem;
-    background-color: #fff;
+    background-color: var(--secondary-background-color);
     box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
 }
 
 .application-header {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--divider-color);
     display: grid;
     grid-template-columns: 2fr 1fr;
     align-items: baseline;
@@ -174,12 +176,12 @@ ul.applications > li {
 }
 
 .summary {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--divider-color);
     margin-bottom: 1rem;
 }
 
 .readme {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--divider-color);
     padding-bottom: 1rem;
     margin-bottom: 1rem;
 }
