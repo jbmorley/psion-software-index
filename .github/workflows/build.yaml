@@ -54,11 +54,11 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}-${{ hashFiles('tools/*') }}
 
     - name: Build index
+      if: steps.cache-index.outputs.cache-hit != 'true'
       run: |
         scripts/build-index.sh
 
     - name: Build site
-      if: steps.cache-index.outputs.cache-hit != 'true'
       run: |
         scripts/build-site.sh
         chmod -v -R +rX "_site/"
