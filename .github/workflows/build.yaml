@@ -43,13 +43,24 @@ jobs:
     - name: Cache the assets
       uses: actions/cache@v4
       with:
-        path: |
-          _assets
+        path: _assets
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}
 
-    - name: Build and test
+    - name: Build index
       run: |
-        scripts/build.sh
+        scripts/build-index.sh
+
+    - name: Cache the index
+      uses: actions/cache@v4
+      id: cache-index
+      with:
+        path: _site/data
+        key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}-${{ hashFiles('tools/*') }}
+
+    - name: Build site
+      if: steps.cache-index.outputs.cache-hit != 'true'
+      run: |
+        scripts/build-site.sh
         chmod -v -R +rX "_site/"
 
     - name: Upload Pages artifact

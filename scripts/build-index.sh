@@ -47,7 +47,3 @@ ia download --itemlist "$ASSETS_LIST_PATH"
 # Build the index.
 cd "$ROOT_DIRECTORY"
 indexer "$LIBRARY_PATH"
-
-# Build the site.
-cd "$SITE_DIRECTORY"
-bundle exec jekyll build
