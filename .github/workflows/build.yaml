@@ -50,7 +50,7 @@ jobs:
       uses: actions/cache@v4
       id: cache-index
       with:
-        path: _site/data
+        path: site/_data
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}-${{ hashFiles('tools/*') }}
 
     - name: Build index
