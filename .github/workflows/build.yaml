@@ -46,16 +46,16 @@ jobs:
         path: _assets
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}
 
-    - name: Build index
-      run: |
-        scripts/build-index.sh
-
     - name: Cache the index
       uses: actions/cache@v4
       id: cache-index
       with:
         path: _site/data
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}-${{ hashFiles('tools/*') }}
+
+    - name: Build index
+      run: |
+        scripts/build-index.sh
 
     - name: Build site
       if: steps.cache-index.outputs.cache-hit != 'true'
