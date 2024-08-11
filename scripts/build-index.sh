@@ -42,7 +42,7 @@ generate-asset-list "$LIBRARY_PATH"
 # Download the assets.
 mkdir -p "$ASSETS_DIRECTORY"
 cd "$ASSETS_DIRECTORY"
-ia download --itemlist "$ASSETS_LIST_PATH"
+ia download --exclude-source derivative --itemlist "$ASSETS_LIST_PATH"
 
 # Build the index.
 cd "$ROOT_DIRECTORY"

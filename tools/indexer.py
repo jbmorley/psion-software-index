@@ -175,7 +175,8 @@ class LibraryMetadataProvider(object):
 # TODO: Rename to source!
 class Library(object):
 
-    def __init__(self, path, name, url, metadata_provider):
+    def __init__(self, id, path, name, url, metadata_provider):
+        self.id = id
         self.path = path
         self.name = name
         self.url = url
@@ -281,6 +282,11 @@ def reference_as_dicts(reference):
     return [item.as_dict() for item in reference]
 
 
+def reference_as_url(reference):
+    components = [reference[0].id] + [urllib.parse.quote_plus(component.path) for component in reference[1:3]]
+    return "https://archive.org/download/" + os.path.join(*components)
+
+
 # TODO: Add additional information into the reference item (e.g., type, identifier)
 #       A reference should be able to find the referenced item without any further information.
 class ReferenceItem(object):
@@ -318,6 +324,7 @@ class Release(object):
             'uid': self.uid,
             'name': self.name,
             'version': self.version,
+            'url': reference_as_url(self.reference),
         }
         icon = self.icon
         if icon:
@@ -539,7 +546,7 @@ def extract_iso(path, destination_path):
     iso = pycdlib.PyCdlib()
     iso.open(path)
 
-    pathname = 'iso_path'
+    pathname = 'joliet_path'
     start_path = '/'
     root_entry = iso.get_record(**{pathname: start_path})
 
@@ -614,7 +621,8 @@ def main():
         if "metadata_provider" in source:
             metadata_provider_class = source["metadata_provider"]
             metadata_provider = globals()[metadata_provider_class](path=source["path"])
-        library = Library(path=source["path"],
+        library = Library(id=source["id"],
+                          path=source["path"],
                           name=source["name"],
                           url=source["url"] if "url" in source else None,
                           metadata_provider=metadata_provider)
