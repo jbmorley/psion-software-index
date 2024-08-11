@@ -3,8 +3,14 @@
 import argparse
 import collections
 import json
+import logging
 import os
 import shutil
+import sys
+
+
+verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
+logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
 
 
 def main():
@@ -22,12 +28,13 @@ def main():
     source_sources_path = os.path.join(index_path, "sources.json")
     source_summary_path = os.path.join(index_path, "summary.json")
 
-    destination_library_path = os.path.join(output_path, "library.json")
-    destination_sources_path = os.path.join(output_path, "sources.json")
-    destination_summary_path = os.path.join(output_path, "summary.json")
-
-
+    data_output_path = os.path.join(output_path, "_data")
     screenshots_output_path = os.path.join(output_path, "screenshots")
+
+    destination_library_path = os.path.join(data_output_path, "library.json")
+    destination_sources_path = os.path.join(data_output_path, "sources.json")
+    destination_summary_path = os.path.join(data_output_path, "summary.json")
+
 
     # Import screenshots from the overlay.
     overlay = collections.defaultdict(list)
@@ -46,7 +53,8 @@ def main():
     if os.path.exists(screenshots_output_path):
         shutil.rmtree(screenshots_output_path)
 
-    # Create the screenshots directory if it doesn't exist.
+    # Create the output directories if they don't exist.
+    os.makedirs(data_output_path)
     os.makedirs(screenshots_output_path)
 
     # Merge the screenshots into the overlay.
@@ -60,6 +68,7 @@ def main():
         for screenshot in screenshots:
             relative_path = os.path.join("screenshots", identifier, os.path.basename(screenshot))
             destination_path = os.path.join(output_path, relative_path)
+            logging.info("Copying '%s' to '%s'...", screenshot, destination_path)
             shutil.copyfile(screenshot, destination_path)
             relative_paths.append(relative_path)
         application['screenshots'] = relative_paths
