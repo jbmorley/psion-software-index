@@ -3,5 +3,6 @@ options:
 sources:
 
 - name: 3-Lib June '05
+  id: 3-libjune-05
   path: _assets/3-libjune-05
   url: https://archive.org/details/3-libjune-05
