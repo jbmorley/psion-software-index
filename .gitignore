@@ -4,6 +4,7 @@
 /_site
 /assets.txt
 /site/_data
+/site/screenshots
 
 .jekyll-cache
 .venv

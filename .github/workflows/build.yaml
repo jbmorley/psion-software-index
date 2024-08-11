@@ -74,6 +74,10 @@ jobs:
       run: |
         scripts/build-index.sh
 
+    - name: Build overlay
+      run: |
+        scripts/build-overlay.sh
+
     - name: Build site
       run: |
         scripts/build-site.sh

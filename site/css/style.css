@@ -128,6 +128,11 @@ table.statistics {
     image-rendering: pixelated;
 }
 
+.screenshot {
+    image-rendering: pixelated;
+    border: 1px solid var(--divider-color);
+}
+
 ul.applications {
     list-style: none;
     margin: 0;
