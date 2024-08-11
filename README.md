@@ -8,15 +8,23 @@ Tools for generating an index of Psion software
 
 Install the dependencies:
 
-```
+```bash
 scripts/install-dependencies.sh
 ```
 
-Run the script:
+Generate the index:
 
+```bash
+scripts/build-index.sh
 ```
-scripts/build.sh
+
+Build the website:
+
+```bash
+scripts/build-site.sh
 ```
+
+These steps are intentionally separated to make it easy to cache different phases of index generation, especially when using GitHub Actions.
 
 ## Tools
 
@@ -33,7 +41,7 @@ For development, it can be useful to be able to run the indexer on a smaller lib
 tools/indexer libraries/small.yaml
 ```
 
-N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally.
+N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally (see [Usage](#usage)).
 
 ## Contributing
 
