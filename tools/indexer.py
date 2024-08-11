@@ -51,12 +51,6 @@ TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
 TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 
-SITE_DIRECTORY = os.path.join(ROOT_DIRECTORY, "site")
-DATA_DIRECTORY = os.path.join(SITE_DIRECTORY, "_data")
-SUMMARY_PATH = os.path.join(DATA_DIRECTORY, "summary.json")
-SOURCES_PATH = os.path.join(DATA_DIRECTORY, "sources.json")
-LIBRARY_PATH = os.path.join(DATA_DIRECTORY, "library.json")
-
 verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -601,8 +595,14 @@ class Iso(object):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("definition")
+    parser.add_argument("output", help="output directory path")
     parser.add_argument('--verbose', '-v', action='store_true', default=False, help="Show verbose output.")
     options = parser.parse_args()
+
+    output_path = os.path.abspath(options.output)
+    summary_path = os.path.join(output_path, "summary.json")
+    sources_path = os.path.join(output_path, "sources.json")
+    library_path = os.path.join(output_path, "library.json")
 
     with open(options.definition) as fh:
         definition = yaml.safe_load(fh)
@@ -645,18 +645,19 @@ def main():
     for identifier, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
         applications.append(Application(identifier, installers, []))
 
-    os.makedirs(DATA_DIRECTORY, exist_ok=True)
+    # Write the index.
+    os.makedirs(output_path, exist_ok=True)
 
-    logging.info("Writing summary...")
-    with open(SUMMARY_PATH, "w") as fh:
+    logging.info("Writing summary '%s'...", summary_path)
+    with open(summary_path, "w") as fh:
         json.dump(summary.as_dict(), fh)
 
-    logging.info("Writing sources...")
-    with open(SOURCES_PATH, "w") as fh:
+    logging.info("Writing sources '%s'...", sources_path)
+    with open(sources_path, "w") as fh:
         json.dump([library.as_dict() for library in libraries], fh)
 
-    logging.info("Writing the library...")
-    with open(LIBRARY_PATH, "w", encoding="utf-8") as fh:
+    logging.info("Writing the library '%s'...", library_path)
+    with open(library_path, "w", encoding="utf-8") as fh:
         json.dump([application.as_dict() for application in applications], fh)
 
 
