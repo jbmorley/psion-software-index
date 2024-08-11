@@ -120,6 +120,12 @@ LIBRARY_INDEXES = [
     "library/siena",
 ]
 
+DOWNLOADABLE_PACKAGES = set([
+    ".sis",
+    ".zip",
+    ".iso",
+])
+
 LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
 
 
@@ -191,6 +197,11 @@ class Library(object):
             'name': self.name,
             'url': self.url,
         }
+
+    def url_for(self, path):
+        if not is_downloadable_package(path):
+            return None
+        return "https://archive.org/download/" + self.id + "/" + urllib.parse.quote_plus(path)
 
 
 class Summary(object):
@@ -282,22 +293,26 @@ def reference_as_dicts(reference):
     return [item.as_dict() for item in reference]
 
 
-def reference_as_url(reference):
-    components = [reference[0].id] + [urllib.parse.quote_plus(component.path) for component in reference[1:3]]
-    return "https://archive.org/download/" + os.path.join(*components)
-
-
 # TODO: Add additional information into the reference item (e.g., type, identifier)
 #       A reference should be able to find the referenced item without any further information.
 class ReferenceItem(object):
 
-    def __init__(self, path):
+    def __init__(self, path, url):
         self.path = path
+        self.url = url
+
+    def url_for(self, path):
+        if self.url is None or not self.path.lower().endswith(".iso"):
+            return None
+        if not is_downloadable_package(path):
+            return None
+        return self.url + "/" + urllib.parse.quote_plus(path)
 
     def as_dict(self):
         return {
             'path': self.path,
             'name': self.path,
+            'url': self.url,
         }
 
 
@@ -324,7 +339,6 @@ class Release(object):
             'uid': self.uid,
             'name': self.name,
             'version': self.version,
-            'url': reference_as_url(self.reference),
         }
         icon = self.icon
         if icon:
@@ -413,6 +427,10 @@ def shasum(path):
     return sha256.hexdigest()
 
 
+def is_downloadable_package(path):
+    return os.path.splitext(path)[1].lower() in DOWNLOADABLE_PACKAGES
+
+
 def import_installer(library, reference, path):
     info = opolua.dumpsis(path)
     icons = []
@@ -453,7 +471,11 @@ def import_apps(library, reference=None, path=None, indent=0):
             if basename in IGNORED or "System/Install" in file_path:
                 continue
 
-            elif ext == ".app":
+            reference_item = ReferenceItem(path=rel_path, url=reference[-1].url_for(rel_path))
+
+            if ext == ".app":
+
+                # TODO: Combine APP and SIS.
 
                 logging.info(" " * indent + f"Importing app '{file_path}'...")
                 aif_path = find_sibling(file_path, name + ".aif")
@@ -476,7 +498,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                         logging.warning("Failed to parse APP as AIF with message '%s'", e)
                 summary = library.summary_for(file_path)
                 readme = readme_for(file_path)
-                release = Release(reference=reference + [ReferenceItem(rel_path)],
+                release = Release(reference=reference + [reference_item],
                                   kind=ReleaseKind.APP,
                                   identifier=uid,
                                   sha256=shasum(file_path),
@@ -492,7 +514,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                 logging.info(" " * indent + f"Importing installer '{file_path}'...")
                 try:
                     apps.append(import_installer(library=library,
-                                                 reference=reference + [ReferenceItem(rel_path)],
+                                                 reference=reference + [reference_item],
                                                  path=file_path))
                 except opolua.InvalidInstaller as e:
                     logging.error("Failed to import installer with message '%s", e)
@@ -502,7 +524,7 @@ def import_apps(library, reference=None, path=None, indent=0):
                 logging.info(" " * indent + f"Importing zip '{file_path}'...")
                 try:
                     with Zip(file_path) as contents_path:
-                        apps.extend(import_apps(library, reference + [ReferenceItem(rel_path)], contents_path, indent=indent+2))
+                        apps.extend(import_apps(library, reference + [reference_item], contents_path, indent=indent+2))
                 except NotImplementedError as e:
                     logging.info(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
                 except zipfile.BadZipFile as e:
@@ -512,7 +534,7 @@ def import_apps(library, reference=None, path=None, indent=0):
 
                 logging.info(" " * indent + f"Importing ISO '{file_path}'...")
                 with Iso(file_path) as contents_path:
-                    apps.extend(import_apps(library, reference + [ReferenceItem(rel_path)], contents_path, indent=indent+2))
+                    apps.extend(import_apps(library, reference + [reference_item], contents_path, indent=indent+2))
 
     return apps
 
