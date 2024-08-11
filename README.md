@@ -38,7 +38,7 @@ The individual tools used to generate the index are located in the 'tools' direc
 For development, it can be useful to be able to run the indexer on a smaller library. For example,
 
 ```
-tools/indexer libraries/small.yaml
+tools/indexer libraries/small.yaml site/_data
 ```
 
 N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally (see [Usage](#usage)).

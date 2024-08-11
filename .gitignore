@@ -1,6 +1,7 @@
 /.local
-/_site
 /_assets
+/_index
+/_site
 /assets.txt
 /site/_data
 
