@@ -49,6 +49,7 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('tools/Pipfile*') }}-${{ hashFiles('site/Gemfile*') }}-${{ hashFiles('tools/Pipfile*') }}-${{ hashFiles('scripts/*') }}
 
     - name: Install dependencies
+      if: steps.cache-python-dependencies.outputs.cache-hit != 'true' || steps.cache-local-dependencies.outputs.cache-hit != 'true'
       run: scripts/install-dependencies.sh
 
     - name: Generate asset list
