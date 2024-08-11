@@ -137,7 +137,6 @@ table.statistics {
 }
 
 .screenshot {
-    image-rendering: pixelated;
     border: 1px solid var(--divider-color);
     max-width: 90%;
 }
