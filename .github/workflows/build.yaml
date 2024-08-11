@@ -36,17 +36,17 @@ jobs:
 
     - name: Cache Python dependencies
       uses: actions/cache@v4
-      id: cache-python
+      id: cache-python-dependencies
       with:
         path: tools/.venv
         key: ${{ runner.os }}-${{ hashFiles('tools/Pipfile*') }}
 
     - name: Cache local dependencies
       uses: actions/cache@v4
-      id: cache-python
+      id: cache-local-dependencies
       with:
         path: .local
-        key: ${{ runner.os }}-${{ hashFiles('tools/Pipfile*')-${{ hashFiles('site/Gemfile*')-${{ hashFiles('tools/Pipfile*')-${{ hashFiles('scripts/*') }}
+        key: ${{ runner.os }}-${{ hashFiles('tools/Pipfile*') }}-${{ hashFiles('site/Gemfile*') }}-${{ hashFiles('tools/Pipfile*') }}-${{ hashFiles('scripts/*') }}
 
     - name: Install dependencies
       run: scripts/install-dependencies.sh
