@@ -134,12 +134,12 @@ table.statistics {
     margin-bottom: 1rem;
     overflow-x: scroll;
     white-space: nowrap;
-    max-width: 700px;
 }
 
 .screenshot {
     image-rendering: pixelated;
     border: 1px solid var(--divider-color);
+    max-width: 90%;
 }
 
 ul.applications {
