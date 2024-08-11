@@ -24,9 +24,13 @@ layout: full
                     <p>{{ application.summary }}</p>
                 </div>
             {% endif %}
-            {% for screenshot in application.screenshots %}
-                <img class="screenshot" src="{{ screenshot }}" />
-            {% endfor %}
+            {% if application.screenshots %}
+                <div class="screenshots">
+                    {% for screenshot in application.screenshots %}
+                        <img class="screenshot" src="{{ screenshot }}" />
+                    {% endfor %}
+                </div>
+            {% endif %}
             {% if application.readme %}
                 <details class="readme">
                     <summary>Readme</summary>
