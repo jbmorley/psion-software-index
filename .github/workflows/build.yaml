@@ -34,19 +34,27 @@ jobs:
       run: |
         python -m pip install --upgrade pipenv wheel
 
+    - name: Cache Python dependencies
+      uses: actions/cache@v4
+      id: cache-python
+      with:
+        path: tools/.venv
+        key: ${{ runner.os }}-${{ hashFiles('tools/Pipfile*') }}
+
     - name: Install dependencies
       run: scripts/install-dependencies.sh
 
-    - name: Generate the asset list
+    - name: Generate asset list
       run: tools/generate-asset-list libraries/full.yaml
 
-    - name: Cache the assets
+    - name: Cache assets
       uses: actions/cache@v4
+      id: cache-assets
       with:
         path: _assets
         key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}
 
-    - name: Cache the index
+    - name: Cache index
       uses: actions/cache@v4
       id: cache-index
       with:
