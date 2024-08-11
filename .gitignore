@@ -5,4 +5,5 @@
 /site/_data
 
 .jekyll-cache
+.venv
 __pycache__
