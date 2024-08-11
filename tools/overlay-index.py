@@ -54,8 +54,8 @@ def main():
         shutil.rmtree(screenshots_output_path)
 
     # Create the output directories if they don't exist.
-    os.makedirs(data_output_path)
-    os.makedirs(screenshots_output_path)
+    os.makedirs(data_output_path, exist_ok=True)
+    os.makedirs(screenshots_output_path, exist_ok=True)
 
     # Merge the screenshots into the overlay.
     for application in index:
