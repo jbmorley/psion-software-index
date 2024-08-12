@@ -60,7 +60,6 @@ layout: full
                                         {% endif %}
                                     {% endfor %}
                                 </div>
-                                <div><a class="install" href="{{ installer.url }}">Download</a></div>
                             {% endfor %}
                         </li>
                     {% endfor %}
