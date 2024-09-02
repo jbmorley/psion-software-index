@@ -1,7 +1,0 @@
-options:
-  show_install_buttons: False
-sources:
-
-- name: Applications
-  path: /Users/jbmorley/Software/Psion/EPOC/Applications
-  url: https://archive.org/details/3-libjune-05

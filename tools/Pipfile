@@ -9,6 +9,8 @@ verify_ssl = true
 jinja2 = "*"
 pycdlib = "*"
 pyyaml = "*"
+requests = "*"
+tqdm = "*"
 
 [requires]
 
