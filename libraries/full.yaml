@@ -1,93 +1,34 @@
 options:
   show_install_buttons: False
+
 sources:
+# - https://archive.org/details/tucows_11029_Setclock
+# - https://archive.org/download/czchip200308cd/Chip_2003-08_cd1.bin
+# - https://archive.org/download/czchip200308cd/Chip_2003-08_cd2.bin
 
-- name: 3-Lib June '05
-  id: 3-libjune-05
-  path: _assets/3-libjune-05
-  url: https://archive.org/details/3-libjune-05
+- https://archive.org/download/3-libjune-05/3LIBJUNE05.iso
+- https://archive.org/download/pilowar/pilowar.iso
+- https://archive.org/download/mame-sl/mame-sl/psion_ssd.zip
+- https://archive.org/download/psioncdvol1/PsionCDVol1.iso
+- https://archive.org/download/psioncdvol2/PsionCDVol2.iso
+- https://archive.org/download/streetplanner99/StreetPlanner99_Contents.zip
+- https://archive.org/download/tucows_6844_Golf_Pro_Enhanced/mx-golfp.zip
+- https://archive.org/download/tucows_31661_PsiBlocks/psiblock.zip
+- https://archive.org/download/tucows_165646_Lingo/lingo20.zip
+- https://archive.org/download/tucows_171771_AgnPrint/AgnPrint.zip
+- https://archive.org/download/tucows_228843_Alignment/alignment.zip
+- https://archive.org/download/tucows_260548_DXFV/dxfv.zip
+- https://archive.org/download/tucows_296952_EPOC_Network_Utilities/netutils.zip
+- https://archive.org/download/tucows_296954_EPOC_FTPServer/ftpserver.zip
+- https://archive.org/download/tucows_308303_Emu48E/Emu48E_v14.zip
+- https://archive.org/download/tucows_315698_PsiMIDI/PsiMIDI.zip
+- https://archive.org/download/tucows_321799_Dighandler/DH813.zip
+- https://archive.org/download/tucows_322115_Speaker/Speaker.zip
+- https://archive.org/download/tucows_325813_Pebbles_on_the_move/Pebbles.zip
 
-- name: AgnPrint
-  id: tucows_171771_AgnPrint
-  path: _assets/tucows_171771_AgnPrint
-  url: https://archive.org/details/tucows_171771_AgnPrint
+overlays:
+- overlays
 
-- name: Alignment
-  id: tucows_228843_Alignment
-  path: _assets/tucows_228843_Alignment
-  url: https://archive.org/details/tucows_228843_Alignment
-
-- name: Dighandler
-  id: tucows_321799_Dighandler
-  path: _assets/tucows_321799_Dighandler
-  url: https://archive.org/details/tucows_321799_Dighandler
-
-- name: DXFV
-  id: tucows_260548_DXFV
-  path: _assets/tucows_260548_DXFV
-  url: https://archive.org/details/tucows_260548_DXFV
-
-- name: Emu48E
-  id: tucows_308303_Emu48E
-  path: _assets/tucows_308303_Emu48E
-  url: https://archive.org/details/tucows_308303_Emu48E
-
-- name: EPOC FTPServer
-  id: tucows_296954_EPOC_FTPServer
-  path: _assets/tucows_296954_EPOC_FTPServer
-  url: https://archive.org/details/tucows_296954_EPOC_FTPServer
-
-- name: EPOC Network Utilities
-  id: tucows_296952_EPOC_Network_Utilities
-  path: _assets/tucows_296952_EPOC_Network_Utilities
-  url: https://archive.org/details/tucows_296952_EPOC_Network_Utilities
-
-- name: Golf Pro (Enhanced)
-  id: tucows_6844_Golf_Pro_Enhanced
-  path: _assets/tucows_6844_Golf_Pro_Enhanced
-  url: https://archive.org/details/tucows_6844_Golf_Pro_Enhanced
-
-- name: Lingo
-  id: tucows_165646_Lingo
-  path: _assets/tucows_165646_Lingo
-  url: https://archive.org/details/tucows_165646_Lingo
-
-# - name: Palmtop PSION 5 Street Planner 99
-#   id: streetplanner99
-#   path: _assets/streetplanner99
-#   url: https://archive.org/details/streetplanner99
-
-- name: Pebbles on the move
-  id: tucows_325813_Pebbles_on_the_move
-  path: _assets/tucows_325813_Pebbles_on_the_move
-  url: https://archive.org/details/tucows_325813_Pebbles_on_the_move
-
-- name: PsiBlocks
-  id: tucows_31661_PsiBlocks
-  path: _assets/tucows_31661_PsiBlocks
-  url: https://archive.org/details/tucows_31661_PsiBlocks
-
-- name: PsiMIDI
-  id: tucows_315698_PsiMIDI
-  path: _assets/tucows_315698_PsiMIDI
-  url: https://archive.org/details/tucows_315698_PsiMIDI
-
-- name: PSION CD - Volume 1 ver 2.0
-  id: psioncdvol1
-  path: _assets/psioncdvol1
-  url: https://archive.org/details/psioncdvol1
-
-- name: PSION CD - Volume 2 ver 2.1
-  id: psioncdvol2
-  path: _assets/psioncdvol2
-  url: https://archive.org/details/psioncdvol2
-
-- name: Setclock
-  id: tucows_11029_Setclock
-  path: _assets/tucows_11029_Setclock
-  url: https://archive.org/details/tucows_11029_Setclock
-
-- name: Speaker
-  id: tucows_322115_Speaker
-  path: _assets/tucows_322115_Speaker
-  url: https://archive.org/details/tucows_322115_Speaker
+assets_directory: _assets
+index_directory: _index  # TODO: Rename this to 'index_directory'
+output_directory: site  # TODO: Rename this to output directory?
