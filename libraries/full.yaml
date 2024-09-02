@@ -2,13 +2,14 @@ options:
   show_install_buttons: False
 
 sources:
+
 # - https://archive.org/details/tucows_11029_Setclock
 # - https://archive.org/download/czchip200308cd/Chip_2003-08_cd1.bin
 # - https://archive.org/download/czchip200308cd/Chip_2003-08_cd2.bin
+# - https://archive.org/download/mame-sl/mame-sl/psion_ssd.zip
 
 - https://archive.org/download/3-libjune-05/3LIBJUNE05.iso
 - https://archive.org/download/enrouteeurope/EnRouteEurope_Contents.zip
-- https://archive.org/download/mame-sl/mame-sl/psion_ssd.zip
 - https://archive.org/download/NWTPsion3/NWT_Psion3.tar
 - https://archive.org/download/pilowar/pilowar.iso
 - https://archive.org/download/pocketwarewoerterbuch/PocketWareTrueDic.iso
