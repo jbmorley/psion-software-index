@@ -23,15 +23,17 @@
 import collections
 import logging
 import os
+import tarfile
 import tempfile
 import zipfile
+import zlib
 
 import pycdlib
 
 import model
 
 
-def _extract_iso(path, destination_path):
+def extract_iso(path, destination_path):
 
     iso = pycdlib.PyCdlib()
     iso.open(path)
@@ -70,37 +72,35 @@ def _extract_iso(path, destination_path):
                 iso.get_file_from_iso(os.path.join(destination_path, relname), **{pathname: ident_to_here})
 
 
-class Iso(object):
+def extract_tar(source, destination):
+    with tarfile.TarFile(source) as tar:
+        tar.extractall(path=destination)
 
-    def __init__(self, path):
+
+def extract_zip(source, destination):
+    with zipfile.ZipFile(source) as zip:
+        zip.extractall(path=destination)
+
+
+CONTAINER_MAPPING = {
+    ".iso": extract_iso,
+    ".tar": extract_tar,
+    ".zip": extract_zip,
+}
+
+
+class Extractor(object):
+
+    def __init__(self, path, method):
         self.path = os.path.abspath(path)
-        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.method = method
 
     def __enter__(self):
         self.pwd = os.getcwd()
-        self.temporary_directory = tempfile.TemporaryDirectory()
-        os.chdir(self.temporary_directory.name)
-        _extract_iso(self.path, self.temporary_directory.name)
-        return self.temporary_directory.name
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        os.chdir(self.pwd)
-        self.temporary_directory.cleanup()
-
-
-class Zip(object):
-
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.temporary_directory = tempfile.TemporaryDirectory()
-
-    def __enter__(self):
-        self.pwd = os.getcwd()
-        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.temporary_directory = tempfile.TemporaryDirectory()  # TODO: Redundant?
         os.chdir(self.temporary_directory.name)
         try:
-            with zipfile.ZipFile(self.path) as zip:
-                zip.extractall()
+            self.method(self.path, self.temporary_directory.name)
             return self.temporary_directory.name
         except:
             os.chdir(self.pwd)
@@ -110,12 +110,6 @@ class Zip(object):
     def __exit__(self, exc_type, exc_value, traceback):
         os.chdir(self.pwd)
         self.temporary_directory.cleanup()
-
-
-CONTAINER_MAPPING = {
-    ".iso": Iso,
-    ".zip": Zip,
-}
 
 
 def walk(path, reference=None, relative_to=None):
@@ -135,12 +129,12 @@ def walk(path, reference=None, relative_to=None):
         if ext in CONTAINER_MAPPING:
             logging.debug("Extracting '%s'...", path)
             try:
-                with CONTAINER_MAPPING[ext](path) as contents_path:
+                with Extractor(path, method=CONTAINER_MAPPING[ext]) as contents_path:
                     for (inner_path, inner_reference) in walk(contents_path,
                                                               reference=reference + [reference_item],
                                                               relative_to=contents_path):
                         yield (inner_path, inner_reference)
-            except (NotImplementedError, zipfile.BadZipFile, OSError, RuntimeError) as e:
-                logging.warning("Failed to extract zip file '%s' with error '%s'.", path, e)
+            except (NotImplementedError, zipfile.BadZipFile, OSError, RuntimeError, tarfile.ReadError, zlib.error) as e:
+                logging.warning("Failed to extract file '%s' with error '%s'.", path, e)
         else:
             yield (path, reference + [reference_item])
