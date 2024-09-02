@@ -27,8 +27,8 @@ sources:
 - https://archive.org/download/tucows_325813_Pebbles_on_the_move/Pebbles.zip
 
 overlays:
-- overlays
+- ../overlays
 
-assets_directory: _assets
-index_directory: _index  # TODO: Rename this to 'index_directory'
-output_directory: site  # TODO: Rename this to output directory?
+assets_directory: ../_assets
+index_directory: ../_index
+output_directory: ../site
