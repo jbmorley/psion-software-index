@@ -397,7 +397,6 @@ def import_source(source, reference=None, path=None, indent=0):
         basename = os.path.basename(file_path)
         name, ext = os.path.splitext(basename)
         ext = ext.lower()
-        rel_path = os.path.relpath(file_path, path)
 
         # TODO: See if this is now fixed with Tom's new detection stuff.
         if basename in IGNORED or "System/Install" in file_path:
@@ -411,17 +410,17 @@ def import_source(source, reference=None, path=None, indent=0):
             aif_path = find_sibling(file_path, name + ".aif")
             uid = shasum(file_path)
             icons = []
-            name = os.path.basename(rel_path)
+            app_name = name
             if aif_path:
                 info = opolua.dumpaif(aif_path)
                 uid = ("0x%08x" % info["uid3"]).lower()
-                name = select_name(info["captions"])
+                app_name = select_name(info["captions"])
                 icons = opolua.get_icons(aif_path)
             else:
                 try:
                     info = opolua.dumpaif(file_path)
                     icons = opolua.get_icons(file_path)
-                    name = select_name(info["captions"])
+                    app_name = select_name(info["captions"])
                 except opolua.InvalidAIF:
                     pass
                 except BaseException as e:
@@ -432,7 +431,7 @@ def import_source(source, reference=None, path=None, indent=0):
                               kind=ReleaseKind.APP,
                               identifier=uid,
                               sha256=shasum(file_path),
-                              name=name,
+                              name=app_name,
                               version="Unknown",
                               icons=icons,
                               summary=summary,
