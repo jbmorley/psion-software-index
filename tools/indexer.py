@@ -37,14 +37,16 @@ import sys
 import tempfile
 import urllib.parse
 import uuid
-import zipfile
 
 from enum import Enum
 
-import pycdlib
 import yaml
 
+import common
+import containers
+import model
 import opolua
+import utils
 
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -120,12 +122,6 @@ LIBRARY_INDEXES = [
     "library/siena",
 ]
 
-DOWNLOADABLE_PACKAGES = set([
-    ".sis",
-    ".zip",
-    ".iso",
-])
-
 LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL", "bg_BG", ""]
 
 
@@ -167,7 +163,7 @@ class LibraryMetadataProvider(object):
                     application_path = os.path.join(path, index_path, match.group(1)).lower()
                     self.descriptions[application_path] = match.group(3)
                     if not os.path.exists(application_path):
-                        logging.warning("WARN: Misisng application path", application_path)
+                        logging.warning("WARN: Missing application path", application_path)
 
     def summary_for(self, path):
         directory = os.path.dirname(path).lower()
@@ -176,32 +172,6 @@ class LibraryMetadataProvider(object):
                 return self.descriptions[directory]
             directory = os.path.dirname(directory)
         return None
-
-
-# TODO: Rename to source!
-class Library(object):
-
-    def __init__(self, id, path, name, url, metadata_provider):
-        self.id = id
-        self.path = path
-        self.name = name
-        self.url = url
-        self.metadata_provider = metadata_provider
-
-    def summary_for(self, path):
-        return self.metadata_provider.summary_for(path)
-
-    def as_dict(self):
-        return {
-            'path': self.path,
-            'name': self.name,
-            'url': self.url,
-        }
-
-    def url_for(self, path):
-        if not is_downloadable_package(path):
-            return None
-        return "https://archive.org/download/" + self.id + "/" + urllib.parse.quote_plus(path)
 
 
 class Summary(object):
@@ -221,7 +191,6 @@ class Summary(object):
         }
 
 
-# TODO: Consider replacing with Collection
 class Version(object):
 
     def __init__(self, installers):
@@ -279,41 +248,13 @@ class Application(object):
         summary = self.summary
         if summary:
             dict['summary'] = summary
-        readme = self.readme  # TODO: Rename to description
+        readme = self.readme
         if readme:
             dict['readme'] = readme
         icon = self.icon
         if icon:
             dict['iconData'] = icon.data
         return dict
-
-
-# TODO: This feels messy. Maybe the reference really should be a class?
-def reference_as_dicts(reference):
-    return [item.as_dict() for item in reference]
-
-
-# TODO: Add additional information into the reference item (e.g., type, identifier)
-#       A reference should be able to find the referenced item without any further information.
-class ReferenceItem(object):
-
-    def __init__(self, path, url):
-        self.path = path
-        self.url = url
-
-    def url_for(self, path):
-        if self.url is None or not self.path.lower().endswith(".iso"):
-            return None
-        if not is_downloadable_package(path):
-            return None
-        return self.url + "/" + urllib.parse.quote_plus(path)
-
-    def as_dict(self):
-        return {
-            'path': self.path,
-            'name': self.path,
-            'url': self.url,
-        }
 
 
 class Release(object):
@@ -333,7 +274,7 @@ class Release(object):
 
     def as_dict(self):
         dict = {
-            'reference': reference_as_dicts(self.reference),
+            'reference': [item.as_dict() for item in self.reference],
             'kind': self.kind.value,
             'sha256': self.sha256,
             'uid': self.uid,
@@ -344,19 +285,6 @@ class Release(object):
         if icon:
             dict['iconData'] = self.icon.data
         return dict
-
-
-class Collection(object):
-
-    def __init__(self, identifier, installers):
-        self.identifier = identifier
-        self.installers = installers  # TODO: Rename to items?
-
-    def as_dict(self):
-        return {
-            'identifier': self.identifier,
-            'installers': [installer.as_dict() for installer in self.installers],
-        }
 
 
 class Reference(object):
@@ -405,7 +333,7 @@ def group_collections(installers, group_by):
     groups = collections.defaultdict(list)
     for installer in installers:
         groups[group_by(installer)].append(installer)
-    return [Collection(identifier, installers) for identifier, installers in groups.items()]
+    return [model.Collection(identifier, installers) for identifier, installers in groups.items()]
 
 
 def select_name(names):
@@ -427,11 +355,7 @@ def shasum(path):
     return sha256.hexdigest()
 
 
-def is_downloadable_package(path):
-    return os.path.splitext(path)[1].lower() in DOWNLOADABLE_PACKAGES
-
-
-def import_installer(library, reference, path):
+def import_installer(source, reference, path):
     info = opolua.dumpsis(path)
     icons = []
     with tempfile.TemporaryDirectory() as temporary_directory_path:
@@ -441,7 +365,7 @@ def import_installer(library, reference, path):
             if contents:
                 aif_path = contents[0]
                 icons = opolua.get_icons(aif_path)
-    summary = library.summary_for(path)
+    summary = source.summary_for(path)
     readme = readme_for(path)
     return Release(reference=reference,
                    kind=ReleaseKind.INSTALLER,
@@ -454,202 +378,77 @@ def import_installer(library, reference, path):
                    readme=readme)
 
 
-def import_apps(library, reference=None, path=None, indent=0):
-    reference = reference if reference else [library]
-    path = path if path else library.path
+# TODO: Rename to just import?
+def import_source(source, reference=None, path=None, indent=0):
+
     apps = []
+    logging.info(" " * indent + f"Importing source '{source.path}'...")
+    for (file_path, reference) in source.assets:
+        basename = os.path.basename(file_path)
+        name, ext = os.path.splitext(basename)
+        ext = ext.lower()
+        rel_path = os.path.relpath(file_path, path)
 
-    logging.info(" " * indent + f"Importing library '{path}'...")
-    for root, dirs, files in os.walk(path):
-        file_paths = [os.path.join(root, f) for f in files]
-        for file_path in file_paths:
-            basename = os.path.basename(file_path)
-            name, ext = os.path.splitext(basename)
-            ext = ext.lower()
-            rel_path = os.path.relpath(file_path, path)
+        # TODO: See if this is now fixed with Tom's new detection stuff.
+        if basename in IGNORED or "System/Install" in file_path:
+            continue
 
-            if basename in IGNORED or "System/Install" in file_path:
-                continue
+        if ext == ".app":
 
-            reference_item = ReferenceItem(path=rel_path, url=reference[-1].url_for(rel_path))
+            # TODO: Combine APP and SIS.
 
-            if ext == ".app":
-
-                # TODO: Combine APP and SIS.
-
-                logging.info(" " * indent + f"Importing app '{file_path}'...")
-                aif_path = find_sibling(file_path, name + ".aif")
-                uid = shasum(file_path)
-                icons = []
-                name = os.path.basename(rel_path)
-                if aif_path:
-                    info = opolua.dumpaif(aif_path)
-                    uid = ("0x%08x" % info["uid3"]).lower()
+            logging.info(" " * indent + f"Importing app '{file_path}'...")
+            aif_path = find_sibling(file_path, name + ".aif")
+            uid = shasum(file_path)
+            icons = []
+            name = os.path.basename(rel_path)
+            if aif_path:
+                info = opolua.dumpaif(aif_path)
+                uid = ("0x%08x" % info["uid3"]).lower()
+                name = select_name(info["captions"])
+                icons = opolua.get_icons(aif_path)
+            else:
+                try:
+                    info = opolua.dumpaif(file_path)
+                    icons = opolua.get_icons(file_path)
                     name = select_name(info["captions"])
-                    icons = opolua.get_icons(aif_path)
-                else:
-                    try:
-                        info = opolua.dumpaif(file_path)
-                        icons = opolua.get_icons(file_path)
-                        name = select_name(info["captions"])
-                    except opolua.InvalidAIF:
-                        pass
-                    except BaseException as e:
-                        logging.warning("Failed to parse APP as AIF with message '%s'", e)
-                summary = library.summary_for(file_path)
-                readme = readme_for(file_path)
-                release = Release(reference=reference + [reference_item],
-                                  kind=ReleaseKind.APP,
-                                  identifier=uid,
-                                  sha256=shasum(file_path),
-                                  name=name,
-                                  version="Unknown",
-                                  icons=icons,
-                                  summary=summary,
-                                  readme=readme)
-                apps.append(release)
+                except opolua.InvalidAIF:
+                    pass
+                except BaseException as e:
+                    logging.warning("Failed to parse APP as AIF with message '%s'", e)
+            summary = source.summary_for(file_path)
+            readme = readme_for(file_path)
+            release = Release(reference=reference,
+                              kind=ReleaseKind.APP,
+                              identifier=uid,
+                              sha256=shasum(file_path),
+                              name=name,
+                              version="Unknown",
+                              icons=icons,
+                              summary=summary,
+                              readme=readme)
+            apps.append(release)
 
-            elif ext == ".sis":
+        elif ext == ".sis":
 
-                logging.info(" " * indent + f"Importing installer '{file_path}'...")
-                try:
-                    apps.append(import_installer(library=library,
-                                                 reference=reference + [reference_item],
-                                                 path=file_path))
-                except opolua.InvalidInstaller as e:
-                    logging.error("Failed to import installer with message '%s", e)
-
-            elif ext == ".zip":
-
-                logging.info(" " * indent + f"Importing zip '{file_path}'...")
-                try:
-                    with Zip(file_path) as contents_path:
-                        apps.extend(import_apps(library, reference + [reference_item], contents_path, indent=indent+2))
-                except NotImplementedError as e:
-                    logging.info(" " * indent + f"Unsupported zip file '{file_path}', {e}.")
-                except zipfile.BadZipFile as e:
-                    logging.info(" " * indent + f"Corrupt zip file '{file_path}', {e}.")
-
-            elif ext == ".iso":
-
-                logging.info(" " * indent + f"Importing ISO '{file_path}'...")
-                with Iso(file_path) as contents_path:
-                    apps.extend(import_apps(library, reference + [reference_item], contents_path, indent=indent+2))
+            logging.info(" " * indent + f"Importing installer '{file_path}'...")
+            try:
+                apps.append(import_installer(source=source, reference=reference, path=file_path))
+            except opolua.InvalidInstaller as e:
+                logging.error("Failed to import installer with message '%s", e)
 
     return apps
 
 
-class Zip(object):
+def index(library):
 
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.temporary_directory = tempfile.TemporaryDirectory()
+    installers = []  # TODO: Rename this to programs, or releases?
+    for source in library.sources:
+        installers += import_source(source)
 
-    def __enter__(self):
-        self.pwd = os.getcwd()
-        self.temporary_directory = tempfile.TemporaryDirectory()
-        os.chdir(self.temporary_directory.name)
-        try:
-            with zipfile.ZipFile(self.path) as zip:
-                zip.extractall()
-            return self.temporary_directory.name
-        except:
-            os.chdir(self.pwd)
-            self.temporary_directory.cleanup()
-            raise
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        os.chdir(self.pwd)
-        self.temporary_directory.cleanup()
-
-
-def extract_iso(path, destination_path):
-
-    iso = pycdlib.PyCdlib()
-    iso.open(path)
-
-    pathname = 'joliet_path'
-    start_path = '/'
-    root_entry = iso.get_record(**{pathname: start_path})
-
-    dirs = collections.deque([root_entry])
-    while dirs:
-        dir_record = dirs.popleft()
-        ident_to_here = iso.full_path_from_dirrecord(dir_record,
-                                                     rockridge=pathname == 'rr_path')
-        relname = ident_to_here[len(start_path):]
-        if relname and relname[0] == '/':
-            relname = relname[1:]
-        if dir_record.is_dir():
-            if relname != '':
-                os.makedirs(os.path.join(destination_path, relname))
-            child_lister = iso.list_children(**{pathname: ident_to_here})
-
-            for child in child_lister:
-                if child is None or child.is_dot() or child.is_dotdot():
-                    continue
-                dirs.append(child)
-        else:
-            if dir_record.is_symlink():
-                fullpath = os.path.join(destination_path, relname)
-                local_dir = os.path.dirname(fullpath)
-                local_link_name = os.path.basename(fullpath)
-                old_dir = os.getcwd()
-                os.chdir(local_dir)
-                os.symlink(dir_record.rock_ridge.symlink_path(), local_link_name)
-                os.chdir(old_dir)
-            else:
-                iso.get_file_from_iso(os.path.join(destination_path, relname), **{pathname: ident_to_here})
-
-
-class Iso(object):
-
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.temporary_directory = tempfile.TemporaryDirectory()
-
-    def __enter__(self):
-        logging.info(f"Opening ISO file '{self.path}'...")
-        self.pwd = os.getcwd()
-        self.temporary_directory = tempfile.TemporaryDirectory()
-        os.chdir(self.temporary_directory.name)
-        extract_iso(self.path, self.temporary_directory.name)
-        return self.temporary_directory.name
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        os.chdir(self.pwd)
-        self.temporary_directory.cleanup()
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("definition")
-    parser.add_argument("output", help="output directory path")
-    parser.add_argument('--verbose', '-v', action='store_true', default=False, help="Show verbose output.")
-    options = parser.parse_args()
-
-    output_path = os.path.abspath(options.output)
-    summary_path = os.path.join(output_path, "summary.json")
-    sources_path = os.path.join(output_path, "sources.json")
-    library_path = os.path.join(output_path, "library.json")
-
-    with open(options.definition) as fh:
-        definition = yaml.safe_load(fh)
-
-    libraries = []
-    installers = []
-    for source in definition["sources"]:
-        metadata_provider = DummyMetadataProvider()
-        if "metadata_provider" in source:
-            metadata_provider_class = source["metadata_provider"]
-            metadata_provider = globals()[metadata_provider_class](path=source["path"])
-        library = Library(id=source["id"],
-                          path=source["path"],
-                          name=source["name"],
-                          url=source["url"] if "url" in source else None,
-                          metadata_provider=metadata_provider)
-        libraries.append(library)
-        installers += import_apps(library)
+    summary_path = os.path.join(library.output_directory, "summary.json")
+    sources_path = os.path.join(library.output_directory, "sources.json")
+    library_path = os.path.join(library.output_directory, "library.json")
 
     unique_uids = set()
     unique_versions = set()
@@ -672,11 +471,12 @@ def main():
                       sha_count=len(unique_shas))
 
     applications = []
-    for identifier, installers in sorted([item for item in groups.items()], key=lambda x: x[1][0].name.lower()):
+    for identifier, installers in sorted([item for item in groups.items()],
+                                         key=lambda x: x[1][0].name.lower()):
         applications.append(Application(identifier, installers, []))
 
     # Write the index.
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(library.output_directory, exist_ok=True)
 
     logging.info("Writing summary '%s'...", summary_path)
     with open(summary_path, "w") as fh:
@@ -684,11 +484,88 @@ def main():
 
     logging.info("Writing sources '%s'...", sources_path)
     with open(sources_path, "w") as fh:
-        json.dump([library.as_dict() for library in libraries], fh)
+        json.dump([source.as_dict() for source in library.sources], fh)
 
     logging.info("Writing the library '%s'...", library_path)
     with open(library_path, "w", encoding="utf-8") as fh:
         json.dump([application.as_dict() for application in applications], fh)
+
+
+def overlay(library):
+    logging.info("Applying overlay...")
+
+    source_library_path = os.path.join(library.index_directory, "library.json")
+    source_sources_path = os.path.join(library.index_directory, "sources.json")
+    source_summary_path = os.path.join(library.index_directory, "summary.json")
+
+    data_output_path = os.path.join(library.site_directory, "_data")
+    screenshots_output_path = os.path.join(library.site_directory, "screenshots")
+
+    destination_library_path = os.path.join(data_output_path, "library.json")
+    destination_sources_path = os.path.join(data_output_path, "sources.json")
+    destination_summary_path = os.path.join(data_output_path, "summary.json")
+
+    # Import screenshots from the overlay.
+    overlay = collections.defaultdict(list)
+    for overlay_directory in library.overlay_directories:
+        for identifier in os.listdir(overlay_directory):
+            if identifier.startswith("."):
+                continue
+            screenshots_path = os.path.join(overlay_directory, identifier)
+            overlay[identifier] = [os.path.join(screenshots_path, screenshot)
+                                   for screenshot in os.listdir(screenshots_path)]
+
+    # Load the index.
+    with open(source_library_path) as fh:
+        index = json.load(fh)
+
+    # Clean up the existing screenshots path.
+    if os.path.exists(screenshots_output_path):
+        shutil.rmtree(screenshots_output_path)
+
+    # Create the output directories if they don't exist.
+    os.makedirs(data_output_path, exist_ok=True)
+    os.makedirs(screenshots_output_path, exist_ok=True)
+
+    # Merge the screenshots into the overlay.
+    for application in index:
+        identifier = application['uid']
+        if identifier not in overlay:
+            continue
+        screenshots = overlay[identifier]
+        os.makedirs(os.path.join(screenshots_output_path, identifier))
+        relative_paths = []
+        for screenshot in screenshots:
+            relative_path = os.path.join("screenshots", identifier, os.path.basename(screenshot))
+            destination_path = os.path.join(library.site_directory, relative_path)
+            logging.info("Copying '%s' to '%s'...", screenshot, destination_path)
+            shutil.copyfile(screenshot, destination_path)
+            relative_paths.append(relative_path)
+        application['screenshots'] = relative_paths
+
+    # Write the index.
+    shutil.copyfile(source_sources_path, destination_sources_path)
+    shutil.copyfile(source_summary_path, destination_summary_path)
+    with open(destination_library_path, "w") as fh:
+        json.dump(index, fh)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verbose', '-v', action='store_true', default=False, help="show verbose output")
+    parser.add_argument("definition")
+    parser.add_argument("command", choices=["sync", "index", "overlay"], nargs="+", help="command to run")
+    options = parser.parse_args()
+
+    library = common.Library(options.definition)
+
+    for command in options.command:
+        if command == "sync":
+            library.sync()
+        if command == "index":
+            index(library)
+        if command == "overlay":
+            overlay(library)
 
 
 if __name__ == "__main__":

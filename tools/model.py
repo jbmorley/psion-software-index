@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
 # Copyright (c) 2024 Jason Morley
 #
@@ -20,18 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -e
-set -o pipefail
-set -x
-set -u
 
-SCRIPTS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+class Collection(object):
 
-ROOT_DIRECTORY="$SCRIPTS_DIRECTORY/.."
-INDEX_DIRECTORY="$ROOT_DIRECTORY/_index"
-OVERLAYS_DIRECTORY="$ROOT_DIRECTORY/overlays"
-SITE_DATA_DIRECTORY="$ROOT_DIRECTORY/site"
+    def __init__(self, identifier, items):
+        self.identifier = identifier
+        self.items = items
 
-source "$SCRIPTS_DIRECTORY/environment.sh"
+    def as_dict(self):
+        return {
+            'identifier': self.identifier,
+            'items': [item.as_dict() for item in self.items],
+        }
 
-overlay-index "$INDEX_DIRECTORY" "$OVERLAYS_DIRECTORY" "$SITE_DATA_DIRECTORY"
+
+class ReferenceItem(object):
+
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+
+    def as_dict(self):
+        return {
+            'name': self.name,
+            'url': self.url,
+        }

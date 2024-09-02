@@ -1,7 +1,9 @@
 /.local
 /_assets
+/_new_assets
 /_index
 /_site
+/_new_index
 /assets.txt
 /site/_data
 /site/screenshots

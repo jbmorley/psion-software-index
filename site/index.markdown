@@ -51,7 +51,7 @@ layout: full
                 <ul>
                     {% for variant in version.variants %}
                         <li>
-                            {% for installer in variant.installers %}
+                            {% for installer in variant.items %}
                                 <div class="path">
                                     {% for component in installer.reference %}
                                         {% if component.url %}<a href="{{ component.url }}">{% endif %}{{ component.name | xml_escape }}{% if component.url %}</a>{% endif %}
