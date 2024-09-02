@@ -66,6 +66,16 @@ IGNORED = set([
     "nEzumi 2.sis",
     "RevoSDK.zip",
     "SCOMMSW.SIS",
+
+    # pilowar
+    "cclock.sis",
+    "japoleon.sis",
+    "GeneWar.sis",
+    "Re-mem.app",
+    "RateCalc.sis",
+    "CubeLine.sis",
+    "WinEPOC.sis",
+    "PsiStatsPro.sis",
 ])
 
 LANGUAGE_EMOJI = {
@@ -446,9 +456,9 @@ def index(library):
     for source in library.sources:
         installers += import_source(source)
 
-    summary_path = os.path.join(library.output_directory, "summary.json")
-    sources_path = os.path.join(library.output_directory, "sources.json")
-    library_path = os.path.join(library.output_directory, "library.json")
+    summary_path = os.path.join(library.index_directory, "summary.json")
+    sources_path = os.path.join(library.index_directory, "sources.json")
+    library_path = os.path.join(library.index_directory, "library.json")
 
     unique_uids = set()
     unique_versions = set()
@@ -476,7 +486,7 @@ def index(library):
         applications.append(Application(identifier, installers, []))
 
     # Write the index.
-    os.makedirs(library.output_directory, exist_ok=True)
+    os.makedirs(library.index_directory, exist_ok=True)
 
     logging.info("Writing summary '%s'...", summary_path)
     with open(summary_path, "w") as fh:
@@ -498,8 +508,8 @@ def overlay(library):
     source_sources_path = os.path.join(library.index_directory, "sources.json")
     source_summary_path = os.path.join(library.index_directory, "summary.json")
 
-    data_output_path = os.path.join(library.site_directory, "_data")
-    screenshots_output_path = os.path.join(library.site_directory, "screenshots")
+    data_output_path = os.path.join(library.output_directory, "_data")
+    screenshots_output_path = os.path.join(library.output_directory, "screenshots")
 
     destination_library_path = os.path.join(data_output_path, "library.json")
     destination_sources_path = os.path.join(data_output_path, "sources.json")
@@ -537,7 +547,7 @@ def overlay(library):
         relative_paths = []
         for screenshot in screenshots:
             relative_path = os.path.join("screenshots", identifier, os.path.basename(screenshot))
-            destination_path = os.path.join(library.site_directory, relative_path)
+            destination_path = os.path.join(library.output_directory, relative_path)
             logging.info("Copying '%s' to '%s'...", screenshot, destination_path)
             shutil.copyfile(screenshot, destination_path)
             relative_paths.append(relative_path)

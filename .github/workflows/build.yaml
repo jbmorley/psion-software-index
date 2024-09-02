@@ -53,31 +53,29 @@ jobs:
       if: steps.cache-python-dependencies.outputs.cache-hit != 'true' || steps.cache-local-dependencies.outputs.cache-hit != 'true'
       run: scripts/install-dependencies.sh
 
-    - name: Generate asset list
-      run: tools/generate-asset-list libraries/full.yaml
-
     - name: Cache assets
       uses: actions/cache@v4
       id: cache-assets
       with:
         path: _assets
-        key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}
+        key: ${{ runner.os }}-${{ hashFiles('libraries/full.yaml') }}
+
+    - name: Download assets
+      run: tools/indexer libraries/full.yaml sync
 
     - name: Cache index
       uses: actions/cache@v4
       id: cache-index
       with:
         path: _index
-        key: ${{ runner.os }}-${{ hashFiles('assets.txt') }}-${{ hashFiles('tools/*') }}
+        key: ${{ runner.os }}-${{ hashFiles('libraries/full.yaml') }}-${{ hashFiles('tools/*') }}
 
     - name: Build index
       if: steps.cache-index.outputs.cache-hit != 'true'
-      run: |
-        scripts/build-index.sh
+      run: tools/indexer libraries/full.yaml index
 
     - name: Build overlay
-      run: |
-        scripts/build-overlay.sh
+      run: tools/indexer libraries/full.yaml overlay
 
     - name: Build site
       run: |

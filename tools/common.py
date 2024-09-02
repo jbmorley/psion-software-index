@@ -55,9 +55,8 @@ class Library(object):
         self.overlay_directories = [os.path.join(root_directory, overlay_directory)
                                     for overlay_directory in self._configuration['overlays']]
         self.assets_directory = os.path.join(root_directory, self._configuration['assets_directory'])
-        self.output_directory = os.path.join(root_directory, self._configuration['output_directory'])  # TODO: Remove
-        self.index_directory = os.path.join(root_directory, self._configuration['output_directory'])
-        self.site_directory = os.path.join(root_directory, self._configuration['site_directory'])
+        self.index_directory = os.path.join(root_directory, self._configuration['index_directory'])
+        self.output_directory = os.path.join(root_directory, self._configuration['output_directory'])
         self.sources = [InternetArchiveSource(self.assets_directory, url)
                         for url in self._configuration['sources']]
 

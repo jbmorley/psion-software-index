@@ -113,10 +113,10 @@ class Zip(object):
 
 
 CONTAINER_MAPPING = {
-    ".bin": Iso,
     ".iso": Iso,
     ".zip": Zip,
 }
+
 
 def walk(path, reference=None, relative_to=None):
     reference = reference if reference is not None else []
@@ -125,7 +125,7 @@ def walk(path, reference=None, relative_to=None):
         for root, dirs, files in os.walk(path):
             for a in [os.path.join(root, f) for f in files]:
                 reference_item = model.ReferenceItem(name=os.path.relpath(a, relative_to), url=None)
-                for (inner_path, inner_reference) in walk(a, reference=reference + [reference_item]):
+                for (inner_path, inner_reference) in walk(a, reference=reference, relative_to=relative_to):
                     yield (inner_path, inner_reference)
     else:
         reference_item = model.ReferenceItem(name=os.path.relpath(path, relative_to), url=None)
@@ -140,9 +140,7 @@ def walk(path, reference=None, relative_to=None):
                                                               reference=reference + [reference_item],
                                                               relative_to=contents_path):
                         yield (inner_path, inner_reference)
-            except NotImplementedError as e:
-                logging.warning("Unsupported zip file '%s', %s.", path, e)
-            except zipfile.BadZipFile as e:
-                logging.warning("Corrupt zip file '%s', %s.", path, e)
+            except (NotImplementedError, zipfile.BadZipFile, OSError, RuntimeError) as e:
+                logging.warning("Failed to extract zip file '%s' with error '%s'.", path, e)
         else:
-            yield (path, reference)
+            yield (path, reference + [reference_item])
