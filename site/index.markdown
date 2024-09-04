@@ -24,6 +24,13 @@ layout: full
                     <p>{{ application.summary }}</p>
                 </div>
             {% endif %}
+            {% if application.tags.size > 0 %}
+                <ul class="tags">
+                {% for tag in application.tags %}
+                    <li class="{{ tag }}">{{ tag }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
             {% if application.screenshots %}
                 <div class="screenshots">
                     {% for screenshot in application.screenshots %}

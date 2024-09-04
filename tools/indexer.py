@@ -218,16 +218,22 @@ class Version(object):
         }
 
 
+# TODO: Rename to Program
 class Application(object):
 
     def __init__(self, uid, installers, screenshots):
         self.uid = uid
-        self.installers = installers
+        self.installers = installers  # TODO: Item / Program / Release?
         self.screenshots = screenshots
         versions = collections.defaultdict(list)
         for installer in installers:
             versions[installer.version].append(installer)
         self.versions = sorted([Version(installers=installers) for installers in versions.values()], key=lambda x: x.version)
+        tags = set()
+        for installer in installers:
+            for tag in installer.tags:
+                tags.add(tag)
+        self.tags = tags
 
     @property
     def name(self):
@@ -254,6 +260,7 @@ class Application(object):
             'name': self.name,
             'summary': self.summary,
             'versions': [version.as_dict() for version in self.versions],
+            'tags': list(self.tags),
         }
         summary = self.summary
         if summary:
@@ -270,7 +277,7 @@ class Application(object):
 class Release(object):
 
     # TODO: Rename UID to identifier everywhere.
-    def __init__(self, reference, kind, identifier, sha256, name, version, icons, summary, readme):
+    def __init__(self, reference, kind, identifier, sha256, name, version, icons, summary, readme, tags):
         self.reference = reference
         self.kind = kind
         self.uid = identifier
@@ -281,6 +288,7 @@ class Release(object):
         self.summary = summary
         self.readme = readme
         self.icon = select_icon(self.icons)
+        self.tags = tags
 
     def as_dict(self):
         dict = {
@@ -290,6 +298,7 @@ class Release(object):
             'uid': self.uid,
             'name': self.name,
             'version': self.version,
+            'tags': self.tags,
         }
         icon = self.icon
         if icon:
@@ -365,16 +374,35 @@ def shasum(path):
     return sha256.hexdigest()
 
 
+def discover_tags(path):
+    tags = []
+    with Chdir(path):
+        for f in glob.glob("**/*", recursive=True):
+            if os.path.isdir(f):
+                continue
+            details = opolua.recognize(f)
+            if "era" in details:
+                tags.append(details["era"])
+    return tags
+
+
 def import_installer(source, reference, path):
     info = opolua.dumpsis(path)
     icons = []
+    tags = []
+
     with tempfile.TemporaryDirectory() as temporary_directory_path:
+
         with Chdir(temporary_directory_path):
             opolua.dumpsis_extract(path, temporary_directory_path)
+
+            tags = discover_tags(temporary_directory_path)
+
             contents = glob.glob("**/*.aif", recursive=True)
             if contents:
                 aif_path = contents[0]
                 icons = opolua.get_icons(aif_path)
+
     summary = source.summary_for(path)
     readme = readme_for(path)
     return Release(reference=reference,
@@ -385,7 +413,8 @@ def import_installer(source, reference, path):
                    version=info["version"],
                    icons=icons,
                    summary=summary,
-                   readme=readme)
+                   readme=readme,
+                   tags=tags)
 
 
 # TODO: Rename to just import?
@@ -405,6 +434,8 @@ def import_source(source, reference=None, path=None, indent=0):
         if ext == ".app":
 
             # TODO: Combine APP and SIS.
+
+            tags = discover_tags(os.path.dirname(file_path))
 
             logging.info(" " * indent + f"Importing app '{file_path}'...")
             aif_path = find_sibling(file_path, name + ".aif")
@@ -435,7 +466,8 @@ def import_source(source, reference=None, path=None, indent=0):
                               version="Unknown",
                               icons=icons,
                               summary=summary,
-                              readme=readme)
+                              readme=readme,
+                              tags=tags)
             apps.append(release)
 
         elif ext == ".sis":
