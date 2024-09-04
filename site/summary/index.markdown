@@ -21,6 +21,10 @@ title: Summary
         <td class="stat">{{ site.data.summary.shaCount }}</td>
         <td>Unique files</td>
     </tr>
+    <tr>
+        <td class="stat">{{ site.data.sources.size }}</td>
+        <td>Sources</td>
+    </tr>
 </table>
 
 If you have suggestions for statistics about the library you'd like to see here, please [raise a GitHub Issue](https://github.com/jbmorley/psion-software-index/issues/new), or [drop me an email](mailto:support@jbmorley.co.uk).

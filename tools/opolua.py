@@ -20,6 +20,7 @@
 
 import base64
 import json
+import logging
 import os
 import re
 import shutil
@@ -31,6 +32,7 @@ ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
 OPOLUA_DIRECTORY = os.path.join(ROOT_DIRECTORY, "dependencies", "opolua")
 DUMPAIF_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpaif.lua")
 DUMPSIS_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "dumpsis.lua")
+RECOGNIZE_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "recognize.lua")
 
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
 NOT_AN_AI_MESSAGE = "Not an AIF file"
@@ -130,3 +132,15 @@ def get_icons(aif_path):
                     data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
                     icons.append(Image(width, height, bpp, data))
         return icons
+
+
+def recognize(path):
+    logging.debug("Recognizing '%s'...", path)
+    try:
+        details = run_json_command(RECOGNIZE_PATH, path)
+        if "era" in details:
+            era = details["era"]
+            details["era"] = "epoc32" if era == "er5" else era
+        return details
+    except:
+        return {"type": "unknown"}

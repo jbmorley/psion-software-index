@@ -113,6 +113,14 @@ table.statistics {
 
 .stat {
     font-weight: bold;
+    padding-right: 0.4em;
+    text-align: right;
+}
+
+/* Icons */
+
+.icon-grid {
+    margin: 1rem;
 }
 
 
@@ -129,9 +137,6 @@ table.statistics {
 }
 
 .screenshots {
-    border-bottom: 1px solid var(--tertiary-background-color);
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
     overflow-x: scroll;
     white-space: nowrap;
 }
@@ -215,6 +220,7 @@ a.install {
     background-color: var(--tertiary-background-color);
     border-radius: 0.5rem;
     padding: 2rem;
+    margin-top: 1rem;
 }
 
 .version-header {
@@ -237,3 +243,34 @@ a.install {
     word-break: break-all;
 }
 
+ul.tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.tags li {
+    display: inline-block;
+    background-color: red;
+    border-radius: 100px;
+    padding: 0.2em 1em;
+    font-size: 0.7rem;
+}
+
+ul.tags li.epoc32 {
+    color: teal;
+    background-color: rgba(0, 127, 127, 0.25);
+}
+
+ul.tags li.sibo {
+    color: orange;
+    background-color: rgba(255, 165, 0, 0.2);
+}
+
+/* Dividers */
+
+.screenshots, ul.tags {
+    border-bottom: 1px solid var(--tertiary-background-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
