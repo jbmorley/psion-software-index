@@ -28,7 +28,9 @@ title: Index
 
 <ul>
     {% for application in site.data.library %}
-        {% if application.tags contains "epoc32" or application.tags contains "sibo" }{% else %}
+        {% if application.tags contains "epoc32" %}
+        {% elsif application.tags contains "sibo" %}
+        {% else %}
             <li>{{ application.name }}</li>
         {% endif %}
     {% endfor %}
