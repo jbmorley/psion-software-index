@@ -8,7 +8,9 @@ layout: full
 <div class="icon-grid">
     {% for application in site.data.library %}
         {% if application.iconData %}
-            <img class="icon" alt="{{ application.name }}" title="{{ application.name }}" src="{{ application.iconData }}">
+            <a href="/programs/{{ application.uid }}">
+                <img class="icon" alt="{{ application.name }}" title="{{ application.name }}" src="{{ application.iconData }}">
+            </a>
         {% endif %}
     {% endfor %}
 </div>

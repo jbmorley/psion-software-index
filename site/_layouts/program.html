@@ -1,0 +1,73 @@
+---
+layout: default
+---
+
+{% assign program = page.program %}
+
+<header>
+
+    {% if program.iconData %}
+        <img class="icon" src="{{ program.iconData }}">
+    {% endif %}
+
+    <h1>{{ page.title }}</h1>
+
+    <p class="application-identifier">{{ program.uid }}</p>
+
+    {% if program.tags.size > 0 %}
+        <ul class="tags">
+        {% for tag in program.tags %}
+            <li class="{{ tag }}">{{ tag }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+</header>
+
+{% if program.screenshots %}
+    <div class="screenshots">
+        {% for screenshot in program.screenshots %}
+            <img class="screenshot" src="/{{ screenshot }}" />
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if program.summary %}
+    <div class="summary">
+        <p>{{ program.summary }}</p>
+    </div>
+{% endif %}
+
+{% if program.readme %}
+    <details class="readme">
+        <summary>Readme</summary>
+        <div class="readme-contents">{{ program.readme | xml_escape }}</div>
+    </details>
+{% endif %}
+
+{% for version in program.versions %}
+    <div class="version-header">
+        <div class="version-name">
+            {{ version.version }}
+        </div>
+        <div class="version-details">
+            {{ version.variants.size }} variants
+        </div>
+    </div>
+    <ul>
+        {% for variant in version.variants %}
+            <li>
+                {% for installer in variant.items %}
+                    <div class="path">
+                        {% for component in installer.reference %}
+                            {% if component.url %}<a href="{{ component.url }}">{% endif %}{{ component.name | xml_escape }}{% if component.url %}</a>{% endif %}
+                            {% if forloop.last == false %}
+                                &#8594;
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endfor %}

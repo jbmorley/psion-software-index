@@ -9,7 +9,7 @@ title: Index
 <ul>
     {% for application in site.data.library %}
         {% if application.tags contains "epoc32" %}
-            <li>{{ application.name }}</li>
+            <li><a href="/programs/{{ application.uid }}">{{ application.name }}</a></li>
         {% endif %}
     {% endfor %}
 </ul>
