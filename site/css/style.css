@@ -202,7 +202,6 @@ ul.applications > li > a {
 }
 
 .readme {
-    border-bottom: 1px solid var(--tertiary-background-color);
     padding-bottom: 1rem;
     margin-bottom: 1rem;
 }

@@ -136,7 +136,7 @@ LANGUAGE_ORDER = ["en_GB", "en_US", "en_AU", "fr_FR", "de_DE", "it_IT", "nl_NL",
 
 class ReleaseKind(Enum):
     INSTALLER = "installer"
-    APP = "app"
+    STANDALONE = "standalone"
 
 class Chdir(object):
 
@@ -233,6 +233,11 @@ class Application(object):
             for tag in installer.tags:
                 tags.add(tag)
         self.tags = tags
+        kinds = set()
+        for installer in installers:
+            kinds.add(installer.kind)
+        self.kinds = kinds
+
 
     @property
     def name(self):
@@ -260,6 +265,7 @@ class Application(object):
             'summary': self.summary,
             'versions': [version.as_dict() for version in self.versions],
             'tags': sorted(list(self.tags)),
+            'kinds': sorted([kind.value for kind in self.kinds]),
         }
         summary = self.summary
         if summary:
@@ -477,7 +483,7 @@ def import_source(source, reference=None, path=None, indent=0):
             summary = source.summary_for(file_path)
             readme = readme_for(file_path)
             release = Release(reference=reference,
-                              kind=ReleaseKind.APP,
+                              kind=ReleaseKind.STANDALONE,
                               identifier=uid,
                               sha256=shasum(file_path),
                               name=app_name,
