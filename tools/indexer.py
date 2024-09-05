@@ -51,7 +51,6 @@ import utils
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
-TEMPLATES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "templates")
 
 verbose = '--verbose' in sys.argv[1:] or '-v' in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format="[%(levelname)s] %(message)s")
@@ -260,7 +259,7 @@ class Application(object):
             'name': self.name,
             'summary': self.summary,
             'versions': [version.as_dict() for version in self.versions],
-            'tags': list(self.tags),
+            'tags': sorted(list(self.tags)),
         }
         summary = self.summary
         if summary:
@@ -298,7 +297,7 @@ class Release(object):
             'uid': self.uid,
             'name': self.name,
             'version': self.version,
-            'tags': self.tags,
+            'tags': sorted(list(self.tags)),
         }
         icon = self.icon
         if icon:
@@ -374,15 +373,34 @@ def shasum(path):
     return sha256.hexdigest()
 
 
+TAG_MAPPING = {
+    "opl": "opl",
+    "opo": "opl",
+    "opa": "opl",
+    "er5": "epoc32",
+}
+
+
+def remap_tag(tag):
+    try:
+        return TAG_MAPPING[tag]
+    except KeyError:
+        return tag
+
+
 def discover_tags(path):
-    tags = []
+    tags = set([])
     with Chdir(path):
         for f in glob.glob("**/*", recursive=True):
             if os.path.isdir(f):
                 continue
             details = opolua.recognize(f)
             if "era" in details:
-                tags.append(details["era"])
+                tags.add(remap_tag(details["era"]))
+            if "type" in details:
+                tags.add(remap_tag(details["type"]))
+    if "unknown" in tags:
+        tags.remove("unknown")
     return tags
 
 

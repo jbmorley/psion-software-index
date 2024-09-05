@@ -137,10 +137,6 @@ def get_icons(aif_path):
 def recognize(path):
     logging.debug("Recognizing '%s'...", path)
     try:
-        details = run_json_command(RECOGNIZE_PATH, path)
-        if "era" in details:
-            era = details["era"]
-            details["era"] = "epoc32" if era == "er5" else era
-        return details
+        return run_json_command(RECOGNIZE_PATH, path)
     except:
         return {"type": "unknown"}

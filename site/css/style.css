@@ -256,7 +256,7 @@ ul.tags {
 
 ul.tags li {
     display: inline-block;
-    background-color: red;
+    background-color: rgba(0, 0, 0, 0.25);
     border-radius: 100px;
     padding: 0.2em 1em;
     font-size: 0.7rem;
@@ -270,6 +270,16 @@ ul.tags li.epoc32 {
 ul.tags li.sibo {
     color: orange;
     background-color: rgba(255, 165, 0, 0.2);
+}
+
+ul.tags li.opa, ul.tags li.opo, ul.tags li.opl {
+    color: red;
+    background-color: rgba(255, 0, 0, 0.25);
+}
+
+ul.tags li.database {
+    color: blue;
+    background-color: rgba(0, 0, 255, 0.25);
 }
 
 /* Dividers */
