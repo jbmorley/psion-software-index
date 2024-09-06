@@ -171,14 +171,12 @@ ul.applications {
 }
 
 .application-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
     align-items: baseline;
 }
 
 .application-header img {
     vertical-align: middle;
-    margin-right: 0.5rem;
+    margin-right: 1rem;
 }
 
 .application-name {
@@ -188,11 +186,16 @@ ul.applications {
 ul.applications > li > a {
     color: var(--foreground-color);
     display: block;
-
     padding: 1.6rem;
     border-radius: 1rem;
     background-color: var(--secondary-background-color);
     box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+    transition: all .3s ease-in-out;
+}
+
+ul.applications > li > a:hover {
+    text-decoration: none;
+    transform: scale(1.05);
 }
 
 .application-identifier {

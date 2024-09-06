@@ -210,10 +210,10 @@ class Version(object):
     def version(self):
         return self.installers[0].version
 
-    def as_dict(self):
+    def as_dict(self, relative_icons_path):
         return {
             'version': self.version,
-            'variants': [variant.as_dict() for variant in self.variants],
+            'variants': [variant.as_dict(relative_icons_path=relative_icons_path) for variant in self.variants],
         }
 
 
@@ -258,12 +258,12 @@ class Application(object):
         return select_icon([installer.icon for installer in self.installers
                             if installer.icon])
 
-    def as_dict(self):
+    def as_dict(self, relative_icons_path):
         dict = {
             'uid': self.uid,
             'name': self.name,
             'summary': self.summary,
-            'versions': [version.as_dict() for version in self.versions],
+            'versions': [version.as_dict(relative_icons_path=relative_icons_path) for version in self.versions],
             'tags': sorted(list(self.tags)),
             'kinds': sorted([kind.value for kind in self.kinds]),
         }
@@ -275,7 +275,7 @@ class Application(object):
             dict['readme'] = readme
         icon = self.icon
         if icon:
-            dict['iconData'] = icon.data
+            dict['icon'] = os.path.join(relative_icons_path, icon.filename)
         return dict
 
 
@@ -295,7 +295,7 @@ class Release(object):
         self.icon = select_icon(self.icons)
         self.tags = tags
 
-    def as_dict(self):
+    def as_dict(self, relative_icons_path):
         dict = {
             'reference': [item.as_dict() for item in self.reference],
             'kind': self.kind.value,
@@ -305,10 +305,14 @@ class Release(object):
             'version': self.version,
             'tags': sorted(list(self.tags)),
         }
-        icon = self.icon
-        if icon:
-            dict['iconData'] = self.icon.data
+        if self.icon is not None:
+            dict['icon'] = os.path.join(relative_icons_path, self.icon.filename)
         return dict
+
+    def write_assets(self, icons_path):
+        if self.icon is None:
+            return
+        self.icon.write(directory_path=icons_path)
 
 
 class Reference(object):
@@ -507,53 +511,65 @@ def import_source(source, reference=None, path=None, indent=0):
 
 def index(library):
 
-    installers = []  # TODO: Rename this to programs, or releases?
-    for source in library.sources:
-        installers += import_source(source)
-
     summary_path = os.path.join(library.index_directory, "summary.json")
     sources_path = os.path.join(library.index_directory, "sources.json")
     library_path = os.path.join(library.index_directory, "library.json")
+    icons_path = os.path.join(library.output_directory, "icons")
 
+    # Import all the standalone apps and installers.
+    releases = []
+    for source in library.sources:
+        releases += import_source(source)
+
+    # Generate the library summary.
     unique_uids = set()
     unique_versions = set()
     unique_shas = set()
     total_count = 0
     details = collections.defaultdict(list)
     groups = collections.defaultdict(list)
-
-    for installer in installers:
-        unique_uids.add(installer.uid)
-        unique_versions.add((installer.uid, installer.version))
-        unique_shas.add(installer.sha256)
+    for release in releases:
+        unique_uids.add(release.uid)
+        unique_versions.add((release.uid, release.version))
+        unique_shas.add(release.sha256)
         total_count = total_count + 1
-        details[(installer.uid, installer.sha256, installer.version)].append(installer)
-        groups[(installer.uid)].append(installer)
-
+        details[(release.uid, release.sha256, release.version)].append(release)
+        groups[(release.uid)].append(release)
     summary = Summary(installer_count=total_count,
                       uid_count=len(unique_uids),
                       version_count=len(unique_versions),
                       sha_count=len(unique_shas))
 
+    # Generate the library by grouping the programs together by identifier/uid.
     applications = []
     for identifier, installers in sorted([item for item in groups.items()],
                                          key=lambda x: x[1][0].name.lower()):
         applications.append(Application(identifier, installers, []))
 
-    # Write the index.
+    # Create the output directory.
     os.makedirs(library.index_directory, exist_ok=True)
 
+    # Write the summary.
     logging.info("Writing summary '%s'...", summary_path)
     with open(summary_path, "w") as fh:
         json.dump(summary.as_dict(), fh)
 
+    # Write the sources.
     logging.info("Writing sources '%s'...", sources_path)
     with open(sources_path, "w") as fh:
         json.dump([source.as_dict() for source in library.sources], fh)
 
+    # Write the library.
     logging.info("Writing the library '%s'...", library_path)
     with open(library_path, "w", encoding="utf-8") as fh:
-        json.dump([application.as_dict() for application in applications], fh)
+        json.dump([application.as_dict(relative_icons_path="/icons") for application in applications], fh)
+
+    # Iterate over all the individual standalone app and installer instances and write the assets to disk.
+    if os.path.exists(icons_path):
+        shutil.rmtree(icons_path)
+    os.makedirs(icons_path)
+    for release in releases:
+        release.write_assets(icons_path=icons_path)
 
 
 def overlay(library):

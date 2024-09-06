@@ -27,10 +27,10 @@ class Collection(object):
         self.identifier = identifier
         self.items = items
 
-    def as_dict(self):
+    def as_dict(self, *args, **kwargs):
         return {
             'identifier': self.identifier,
-            'items': [item.as_dict() for item in self.items],
+            'items': [item.as_dict(*args, **kwargs) for item in self.items],
         }
 
 

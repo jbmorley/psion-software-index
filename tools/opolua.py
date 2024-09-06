@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import base64
+import hashlib
 import json
 import logging
 import os
@@ -26,6 +27,11 @@ import re
 import shutil
 import subprocess
 import tempfile
+
+from io import BytesIO
+
+from PIL import Image as PILImage
+
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
@@ -48,11 +54,33 @@ class InvalidAIF(Exception):
 
 class Image(object):
 
-    def __init__(self, width, height, bpp, data):
+    def __init__(self, width, height, bpp, source):
         self.width = width
         self.height = height
         self.bpp = bpp
-        self.data = data
+        self._source = source
+        self._shasum = None
+
+    @property
+    def data(self):
+        with BytesIO() as output:
+            self._source.save(output, format="GIF")
+            return output.getvalue()
+
+    @property
+    def shasum(self):
+        if self._shasum is None:
+            sha256 = hashlib.sha256()
+            sha256.update(self.data)
+            self._shasum = sha256.hexdigest()
+        return self._shasum
+
+    @property
+    def filename(self):
+        return self.shasum + ".gif"
+
+    def write(self, directory_path):
+        self._source.save(os.path.join(directory_path, self.filename), format="GIF")
 
 
 def run_json_command(command, path):
@@ -128,9 +156,9 @@ def get_icons(aif_path):
                 height = int(match.group(3))
                 bpp = int(match.group(4))
                 asset_path = os.path.join(aif_dirname, candidate)
-                with open(asset_path, 'rb') as fh:
-                    data = "data:image/bmp;base64," + base64.b64encode(fh.read()).decode('utf-8')
-                    icons.append(Image(width, height, bpp, data))
+                with PILImage.open(asset_path) as image, BytesIO() as output:
+                    image_copy = image.convert("RGB")
+                    icons.append(Image(width, height, bpp, image_copy))
         return icons
 
 
