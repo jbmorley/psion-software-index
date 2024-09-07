@@ -12,7 +12,7 @@ layout: full
                 <div class="application-header">
                     <div class="application-name">
                         {% if application.icon %}
-                            <img class="icon" src="{{ application.icon }}">
+                            <img class="icon" src="/{{ application.icon }}">
                         {% endif %}
                         {{ application.name }}
                     </div>

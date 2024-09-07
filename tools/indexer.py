@@ -514,7 +514,7 @@ def index(library):
     summary_path = os.path.join(library.index_directory, "summary.json")
     sources_path = os.path.join(library.index_directory, "sources.json")
     library_path = os.path.join(library.index_directory, "library.json")
-    icons_path = os.path.join(library.output_directory, "icons")
+    icons_path = os.path.join(library.index_directory, "icons")
 
     # Import all the standalone apps and installers.
     releases = []
@@ -562,7 +562,7 @@ def index(library):
     # Write the library.
     logging.info("Writing the library '%s'...", library_path)
     with open(library_path, "w", encoding="utf-8") as fh:
-        json.dump([application.as_dict(relative_icons_path="/icons") for application in applications], fh)
+        json.dump([application.as_dict(relative_icons_path="icons") for application in applications], fh)
 
     # Iterate over all the individual standalone app and installer instances and write the assets to disk.
     if os.path.exists(icons_path):
@@ -578,9 +578,11 @@ def overlay(library):
     source_library_path = os.path.join(library.index_directory, "library.json")
     source_sources_path = os.path.join(library.index_directory, "sources.json")
     source_summary_path = os.path.join(library.index_directory, "summary.json")
+    icons_path = os.path.join(library.index_directory, "icons")
 
     data_output_path = os.path.join(library.output_directory, "_data")
     screenshots_output_path = os.path.join(library.output_directory, "screenshots")
+    icons_output_path = os.path.join(library.output_directory, "icons")
 
     destination_library_path = os.path.join(data_output_path, "library.json")
     destination_sources_path = os.path.join(data_output_path, "sources.json")
@@ -629,6 +631,11 @@ def overlay(library):
     shutil.copyfile(source_summary_path, destination_summary_path)
     with open(destination_library_path, "w") as fh:
         json.dump(index, fh)
+
+    # Copy the icons.
+    if os.path.exists(icons_output_path):
+        shutil.rmtree(icons_output_path)
+    shutil.copytree(icons_path, icons_output_path)
 
 
 def main():
