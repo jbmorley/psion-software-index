@@ -7,9 +7,9 @@ title: Index
 ## EPOC32
 
 <ul>
-    {% for application in site.data.library %}
-        {% if application.tags contains "epoc32" %}
-            <li><a href="/programs/{{ application.uid }}">{{ application.name }}</a></li>
+    {% for program in site.data.programs %}
+        {% if program.tags contains "epoc32" %}
+            <li><a href="/programs/{{ program.uid }}">{{ program.name }}</a></li>
         {% endif %}
     {% endfor %}
 </ul>
@@ -17,9 +17,9 @@ title: Index
 ## SIBO
 
 <ul>
-    {% for application in site.data.library %}
-        {% if application.tags contains "sibo" %}
-            <li>{{ application.name }}</li>
+    {% for program in site.data.programs %}
+        {% if program.tags contains "sibo" %}
+            <li>{{ program.name }}</li>
         {% endif %}
     {% endfor %}
 </ul>
@@ -27,11 +27,11 @@ title: Index
 ## Unknown
 
 <ul>
-    {% for application in site.data.library %}
-        {% if application.tags contains "epoc32" %}
-        {% elsif application.tags contains "sibo" %}
+    {% for program in site.data.programs %}
+        {% if program.tags contains "epoc32" %}
+        {% elsif program.tags contains "sibo" %}
         {% else %}
-            <li>{{ application.name }}</li>
+            <li>{{ program.name }}</li>
         {% endif %}
     {% endfor %}
 </ul>
