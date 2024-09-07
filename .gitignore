@@ -4,6 +4,7 @@
 /_site
 /assets.txt
 /site/_data
+/site/icons
 /site/screenshots
 
 .jekyll-cache
