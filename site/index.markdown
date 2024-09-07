@@ -6,15 +6,15 @@ layout: full
 # Library
 
 <ul class="applications">
-    {% for application in site.data.library %}
+    {% for program in site.data.programs %}
         <li>
-            <a href="/programs/{{ application.uid }}">
+            <a href="/programs/{{ program.uid }}">
                 <div class="application-header">
                     <div class="application-name">
-                        {% if application.icon %}
-                            <img class="icon" src="/{{ application.icon }}">
+                        {% if program.icon %}
+                            <img class="icon" src="/{{ program.icon }}">
                         {% endif %}
-                        {{ application.name }}
+                        {{ program.name }}
                     </div>
                 </div>
             </a>

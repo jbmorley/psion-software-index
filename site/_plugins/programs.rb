@@ -3,7 +3,7 @@ module SamplePlugin
     safe true
 
     def generate(site)
-      site.data['library'].each do |program|
+      site.data['programs'].each do |program|
         site.pages << ProgramPage.new(site, program)
       end
     end

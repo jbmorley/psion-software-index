@@ -513,7 +513,7 @@ def index(library):
 
     summary_path = os.path.join(library.index_directory, "summary.json")
     sources_path = os.path.join(library.index_directory, "sources.json")
-    library_path = os.path.join(library.index_directory, "library.json")
+    programs_path = os.path.join(library.index_directory, "programs.json")
     icons_path = os.path.join(library.index_directory, "icons")
 
     # Import all the standalone apps and installers.
@@ -560,8 +560,8 @@ def index(library):
         json.dump([source.as_dict() for source in library.sources], fh)
 
     # Write the library.
-    logging.info("Writing the library '%s'...", library_path)
-    with open(library_path, "w", encoding="utf-8") as fh:
+    logging.info("Writing the library '%s'...", programs_path)
+    with open(programs_path, "w", encoding="utf-8") as fh:
         json.dump([application.as_dict(relative_icons_path="icons") for application in applications], fh)
 
     # Iterate over all the individual standalone app and installer instances and write the assets to disk.
@@ -575,7 +575,7 @@ def index(library):
 def overlay(library):
     logging.info("Applying overlay...")
 
-    source_library_path = os.path.join(library.index_directory, "library.json")
+    source_programs_path = os.path.join(library.index_directory, "programs.json")
     source_sources_path = os.path.join(library.index_directory, "sources.json")
     source_summary_path = os.path.join(library.index_directory, "summary.json")
     icons_path = os.path.join(library.index_directory, "icons")
@@ -583,8 +583,10 @@ def overlay(library):
     data_output_path = os.path.join(library.output_directory, "_data")
     screenshots_output_path = os.path.join(library.output_directory, "screenshots")
     icons_output_path = os.path.join(library.output_directory, "icons")
+    api_output_path = os.path.join(library.output_directory, "api")
+    api_v1_output_path = os.path.join(api_output_path, "v1")
 
-    destination_library_path = os.path.join(data_output_path, "library.json")
+    destination_programs_path = os.path.join(data_output_path, "programs.json")
     destination_sources_path = os.path.join(data_output_path, "sources.json")
     destination_summary_path = os.path.join(data_output_path, "summary.json")
 
@@ -599,12 +601,18 @@ def overlay(library):
                                    for screenshot in os.listdir(screenshots_path)]
 
     # Load the index.
-    with open(source_library_path) as fh:
+    with open(source_programs_path) as fh:
         index = json.load(fh)
 
-    # Clean up the existing screenshots path.
+    # Clean up the destination paths.
     if os.path.exists(screenshots_output_path):
         shutil.rmtree(screenshots_output_path)
+    if os.path.exists(data_output_path):
+        shutil.rmtree(data_output_path)
+    if os.path.exists(icons_output_path):
+        shutil.rmtree(icons_output_path)
+    if os.path.exists(api_output_path):
+        shutil.rmtree(api_output_path)
 
     # Create the output directories if they don't exist.
     os.makedirs(data_output_path, exist_ok=True)
@@ -629,13 +637,14 @@ def overlay(library):
     # Write the index.
     shutil.copyfile(source_sources_path, destination_sources_path)
     shutil.copyfile(source_summary_path, destination_summary_path)
-    with open(destination_library_path, "w") as fh:
+    with open(destination_programs_path, "w") as fh:
         json.dump(index, fh)
 
     # Copy the icons.
-    if os.path.exists(icons_output_path):
-        shutil.rmtree(icons_output_path)
     shutil.copytree(icons_path, icons_output_path)
+
+    # Copy the API.
+    shutil.copytree(library.index_directory, api_v1_output_path)
 
 
 def main():
