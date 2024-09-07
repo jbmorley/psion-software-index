@@ -583,8 +583,7 @@ def overlay(library):
     data_output_path = os.path.join(library.output_directory, "_data")
     screenshots_output_path = os.path.join(library.output_directory, "screenshots")
     icons_output_path = os.path.join(library.output_directory, "icons")
-    api_output_path = os.path.join(library.output_directory, "api")
-    api_v1_output_path = os.path.join(api_output_path, "v1")
+    api_v1_output_path = os.path.join(library.output_directory, "api", "v1")
 
     destination_programs_path = os.path.join(data_output_path, "programs.json")
     destination_sources_path = os.path.join(data_output_path, "sources.json")
@@ -611,8 +610,8 @@ def overlay(library):
         shutil.rmtree(data_output_path)
     if os.path.exists(icons_output_path):
         shutil.rmtree(icons_output_path)
-    if os.path.exists(api_output_path):
-        shutil.rmtree(api_output_path)
+    if os.path.exists(api_v1_output_path):
+        shutil.rmtree(api_v1_output_path)
 
     # Create the output directories if they don't exist.
     os.makedirs(data_output_path, exist_ok=True)
