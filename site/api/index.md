@@ -8,16 +8,19 @@ title: API
 
 The Psion Software Index provides a basic API in the form of static JSON files offering a structured data form of the index.
 
-
 ### Programs
 
-`https://software.psion.info/api/v1/programs.json`
+```txt
+https://software.psion.info/api/v1/programs.json
+```
 
 ### Summary
 
-`https://software.psion.info/api/v1/summary.json`
+```txt
+https://software.psion.info/api/v1/summary.json
+```
 
-Example output:
+#### Example Output
 
 ```
 {
@@ -32,9 +35,11 @@ Example output:
 
 Details of the sources used to compile the index:
 
-`https://software.psion.info/api/v1/sources.json`
+```txt
+https://software.psion.info/api/v1/sources.json
+```
 
-Example output:
+#### Example Output
 
 ```json
 [
