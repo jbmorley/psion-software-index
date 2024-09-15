@@ -217,8 +217,7 @@ class Version(object):
         }
 
 
-# TODO: Rename to Program
-class Application(object):
+class Program(object):
 
     def __init__(self, uid, installers, screenshots):
         self.uid = uid
@@ -275,7 +274,11 @@ class Application(object):
             dict['readme'] = readme
         icon = self.icon
         if icon:
-            dict['icon'] = os.path.join(relative_icons_path, icon.filename)
+            dict['icon'] = {
+                'path': os.path.join(relative_icons_path, icon.filename),
+                'width': icon.width,
+                'height': icon.height,
+            }
         return dict
 
 
@@ -306,7 +309,11 @@ class Release(object):
             'tags': sorted(list(self.tags)),
         }
         if self.icon is not None:
-            dict['icon'] = os.path.join(relative_icons_path, self.icon.filename)
+            dict['icon'] = {
+                'path': os.path.join(relative_icons_path, self.icon.filename),
+                'width': self.icon.width,
+                'height': self.icon.height,
+            }
         return dict
 
     def write_assets(self, icons_path):
@@ -544,7 +551,7 @@ def index(library):
     applications = []
     for identifier, installers in sorted([item for item in groups.items()],
                                          key=lambda x: x[1][0].name.lower()):
-        applications.append(Application(identifier, installers, []))
+        applications.append(Program(identifier, installers, []))
 
     # Create the output directory.
     os.makedirs(library.index_directory, exist_ok=True)
