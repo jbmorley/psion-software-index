@@ -43,6 +43,11 @@ RECOGNIZE_PATH = os.path.join(OPOLUA_DIRECTORY, "src", "recognize.lua")
 UNSUPPORTED_MESSAGE = "Only ER5 SIS files are supported"
 NOT_AN_AI_MESSAGE = "Not an AIF file"
 
+try:
+    LUA_PATH = os.environ["LUA_PATH"]
+except KeyError:
+    LUA_PATH = "lua"
+
 
 class InvalidInstaller(Exception):
     pass
@@ -84,7 +89,7 @@ class Image(object):
 
 
 def run_json_command(command, path):
-    result = subprocess.run(["lua", command, "--json", path], capture_output=True)
+    result = subprocess.run([LUA_PATH, command, "--json", path], capture_output=True)
     stdout = result.stdout.decode('utf-8')
     stderr = result.stderr.decode('utf-8')
 
@@ -116,7 +121,7 @@ def dumpaif(path):
 
 
 def dumpsis_extract(source, destination):
-    result = subprocess.run(["lua", DUMPSIS_PATH, source, destination], capture_output=True)
+    result = subprocess.run([LUA_PATH, DUMPSIS_PATH, source, destination], capture_output=True)
 
     # Sadly we ignore foreign characters right now and using CP1252 by default.
     stdout = result.stdout.decode('utf-8')
@@ -143,7 +148,7 @@ def get_icons(aif_path):
         aif_basename = os.path.basename(aif_path)
         temporary_aif_path = os.path.join(directory_path, aif_basename)
         shutil.copyfile(aif_path, temporary_aif_path)
-        subprocess.check_output(["lua", DUMPAIF_PATH, "-e", temporary_aif_path])
+        subprocess.check_output([LUA_PATH, DUMPAIF_PATH, "-e", temporary_aif_path])
         aif_basename = os.path.basename(temporary_aif_path)
         aif_dirname = os.path.dirname(temporary_aif_path)
         icon_candidates = os.listdir(aif_dirname)
