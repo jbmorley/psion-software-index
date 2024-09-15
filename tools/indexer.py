@@ -350,8 +350,8 @@ def readme_for(path):
 
 
 def select_icon(icons):
-    square_icons = [icon for icon in icons if icon.width == icon.height]
-    icons = list(reversed(sorted(icons, key=lambda x: (x.bpp, x.width))))
+    candidates = [icon for icon in icons if icon.width == icon.height and icon.width <= 48]
+    icons = list(reversed(sorted(candidates, key=lambda x: (x.bpp, x.width))))
     if len(icons) < 1:
         return None
     return icons[0]
