@@ -589,6 +589,10 @@ def overlay(library):
     destination_sources_path = os.path.join(data_output_path, "sources.json")
     destination_summary_path = os.path.join(data_output_path, "summary.json")
 
+    api_v1_programs_path = os.path.join(api_v1_output_path, "programs.json")
+    api_v1_sources_path = os.path.join(api_v1_output_path, "sources.json")
+    api_v1_summary_path = os.path.join(api_v1_output_path, "summary.json")
+
     # Import screenshots from the overlay.
     overlay = collections.defaultdict(list)
     for overlay_directory in library.overlay_directories:
@@ -644,6 +648,9 @@ def overlay(library):
 
     # Copy the API.
     shutil.copytree(library.index_directory, api_v1_output_path)
+    shutil.copyfile(destination_sources_path, api_v1_sources_path)
+    shutil.copyfile(destination_summary_path, api_v1_summary_path)
+    shutil.copyfile(destination_programs_path, api_v1_programs_path)
 
 
 def main():
