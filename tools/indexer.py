@@ -648,6 +648,7 @@ def overlay(library):
 
     # Copy the API.
     shutil.copytree(library.index_directory, api_v1_output_path)
+    shutil.copytree(screenshots_output_path, os.path.join(api_v1_output_path, "screenshots"))
     shutil.copyfile(destination_sources_path, api_v1_sources_path)
     shutil.copyfile(destination_summary_path, api_v1_summary_path)
     shutil.copyfile(destination_programs_path, api_v1_programs_path)
