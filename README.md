@@ -12,10 +12,22 @@ Install the dependencies:
 scripts/install-dependencies.sh
 ```
 
+Download the assets:
+
+```bash
+tools/indexer libraries/full.yaml sync
+```
+
 Generate the index:
 
 ```bash
-scripts/build-index.sh
+tools/indexer libraries/full.yaml index
+```
+
+Apply the overlay:
+
+```bash
+tools/indexer libraries/full.yaml overlay
 ```
 
 Build the website:
@@ -26,22 +38,36 @@ scripts/build-site.sh
 
 These steps are intentionally separated to make it easy to cache different phases of index generation, especially when using GitHub Actions.
 
-## Tools
-
-The individual tools used to generate the index are located in the 'tools' directory:
-
-- `generate-asset-list`—generate a text file that can be used by the Internet Archive downloader (`ia`) for a specific library definition
-- `indexer`—generate the HTML index for a given library (assumes all referenced assets are available locally)
-
 ## Development
 
-For development, it can be useful to be able to run the indexer on a smaller library. For example,
+Check out the source, remembering to clone the submodules:
 
-```
-tools/indexer libraries/small.yaml site/_data
+```bash
+git clone git@github.com:jbmorley/psion-software-index.git
+cd psion-software-index
+git submodule update --init --recursive
 ```
 
-N.B. You will need to have run the full built-out at least once to ensure you have the assets available locally (see [Usage](#usage)).
+It can be useful to be able to run the indexer on a smaller library:
+
+```bash
+tools/indexer libraries/3lib.yaml sync index overlay
+```
+
+You can serve the site locally as follows:
+
+```bash
+cd site
+bundle exec jekyll serve --watch
+```
+
+Subsequent calls to update the index will cause the site to be rebuilt automatically.
+
+**Note:** The indexer runs multiple commands and Lua scripts during the indexing process (approximately 100,000 for the current library). Small changes in process launch times can therefore significantly impact index generation performance, and shim-based environment managers like [asdf](https://asdf-vm.com) can cause real problems. To work around this, the indexer respects the `LUA_PATH` environment variable to allow shims to be bypassed. For example,
+
+```bash
+LUA_PATH=/opt/homebrew/bin/lua tools/indexer libraries/3lib.yaml sync index overlay
+```
 
 ## Contributing
 
