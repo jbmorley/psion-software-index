@@ -19,7 +19,7 @@ title: Index
 <ul>
     {% for program in site.data.programs %}
         {% if program.tags contains "sibo" %}
-            <li>{{ program.name }}</li>
+            <li><a href="/programs/{{ program.uid }}">{{ program.name }}</a></li>
         {% endif %}
     {% endfor %}
 </ul>
@@ -31,7 +31,7 @@ title: Index
         {% if program.tags contains "epoc32" %}
         {% elsif program.tags contains "sibo" %}
         {% else %}
-            <li>{{ program.name }}</li>
+            <li><a href="/programs/{{ program.uid }}">{{ program.name }}</a></li>
         {% endif %}
     {% endfor %}
 </ul>
