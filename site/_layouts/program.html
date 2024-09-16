@@ -48,28 +48,31 @@ layout: default
 {% endif %}
 
 {% for version in program.versions %}
-    <div class="version-header">
-        <div class="version-name">
-            {{ version.version }}
-        </div>
-        <div class="version-details">
-            {{ version.variants.size }} variants
-        </div>
-    </div>
-    <ul>
+    <h2>{{ version.version }}</h2>
+    <table>
         {% for variant in version.variants %}
-            <li>
-                {% for installer in variant.items %}
-                    <div class="path">
-                        {% for component in installer.reference %}
-                            {% if component.url %}<a href="{{ component.url }}">{% endif %}{{ component.name | xml_escape }}{% if component.url %}</a>{% endif %}
-                            {% if forloop.last == false %}
-                                &#8594;
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </li>
+            {% for installer in variant.items %}
+                <tr>
+                    <td>
+                        {% if installer.icon %}
+                            <img class="icon" width="{{ installer.icon.width }}" height="{{ installer.icon.height }}" src="/{{ installer.icon.path }}">
+                        {% else %}
+                            <img class="icon" width="48" height="48" src="/images/unknown.gif">
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="path">
+                            {% for component in installer.reference %}
+                                {% if component.url %}<a href="{{ component.url }}">{% endif %}{{ component.name | xml_escape }}{% if component.url %}</a>{% endif %}
+                                {% if forloop.last == false %}
+                                    &#8594;
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="sha">{{ installer.sha256 }}</div>
+                    </td>
+                </tr>
+            {% endfor %}
         {% endfor %}
-    </ul>
+    </table>
 {% endfor %}

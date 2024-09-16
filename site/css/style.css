@@ -137,6 +137,7 @@ table.statistics {
 
 .sha, .uid {
     font-family: monospace;
+    color: #ccc;
 }
 
 .icon {
@@ -226,21 +227,6 @@ a.install {
     border-radius: 0.5rem;
     padding: 2rem;
     margin-top: 1rem;
-}
-
-.version-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: baseline;
-}
-
-.version-name {
-    font-size: 1.2rem;
-}
-
-.version-details {
-    text-align: right;
-    font-variant: small-caps;
 }
 
 .path {
