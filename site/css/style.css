@@ -1,6 +1,6 @@
 :root {
     --foreground-color: #000;
-    --background-color: rgb(246, 246, 246);
+    --background-color: #fff;
     --secondary-background-color: #fff;
     --tertiary-background-color: #eee;
     --link-color: orange;
@@ -18,7 +18,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: sans-serif;
     text-align: center;
     margin: 0;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
@@ -170,19 +170,6 @@ ul.applications {
     }
 }
 
-.application-header {
-    align-items: baseline;
-}
-
-.application-header img {
-    vertical-align: middle;
-    margin-right: 1rem;
-}
-
-.application-name {
-    font-size: 1.2rem;
-}
-
 ul.applications > li > a {
     color: var(--foreground-color);
     display: block;
@@ -191,11 +178,18 @@ ul.applications > li > a {
     background-color: var(--secondary-background-color);
     box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
     transition: all .3s ease-in-out;
+    align-items: baseline;
+    font-size: 1.2rem;
 }
 
 ul.applications > li > a:hover {
     text-decoration: none;
     transform: scale(1.05);
+}
+
+ul.applications > li > a img {
+    vertical-align: middle;
+    margin-right: 1rem;
 }
 
 .application-identifier {
