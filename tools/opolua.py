@@ -30,7 +30,7 @@ import tempfile
 
 from io import BytesIO
 
-from PIL import Image as PILImage
+from PIL import Image as PILImage, ImageOps
 
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -161,8 +161,20 @@ def get_icons(aif_path):
                 height = int(match.group(3))
                 bpp = int(match.group(4))
                 asset_path = os.path.join(aif_dirname, candidate)
+
+                # Load the mask if it exists.
+                mask = None
+                mask_path = os.path.join(aif_dirname, f"{aif_basename}_{index}_mask_{width}x{height}_2bpp.bmp")
+                if os.path.exists(mask_path):
+                    with PILImage.open(mask_path) as m:
+                        mask = m.convert("L").point(lambda i: i * 85)
+                        mask = ImageOps.invert(mask)
+
+                # Load the image.
                 with PILImage.open(asset_path) as image, BytesIO() as output:
-                    image_copy = image.convert("RGB")
+                    image_copy = image.convert("RGBA")
+                    if mask:
+                        image_copy.putalpha(mask)
                     icons.append(Image(width, height, bpp, image_copy))
         return icons
 
