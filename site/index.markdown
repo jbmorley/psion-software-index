@@ -5,21 +5,4 @@ layout: full
 
 # Library
 
-<ul class="applications">
-    {% for program in site.data.programs %}
-        <li>
-            <a href="/programs/{{ program.uid }}">
-                <div class="application-header">
-                    <div class="application-name">
-                        {% if program.icon %}
-                            <img class="icon" width="{{ program.icon.width }}" height="{{ program.icon.height }}" src="/{{ program.icon.path }}">
-                        {% else %}
-                            <img class="icon" width="48" height="48" src="/images/unknown.gif">
-                        {% endif %}
-                        {{ program.name }}
-                    </div>
-                </div>
-            </a>
-        </li>
-    {% endfor %}
-</ul>
+<ul class="applications">{% for program in site.data.programs %}<li><a href="/programs/{{ program.uid }}">{% if program.icon %}<img class="icon" width="{{ program.icon.width }}" height="{{ program.icon.height }}" src="/{{ program.icon.path }}">{% else %}<img class="icon" width="48" height="48" src="/images/unknown.gif">{% endif %}{{ program.name }}</a></li>{% endfor %}</ul>
