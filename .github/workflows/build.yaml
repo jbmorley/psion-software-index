@@ -36,7 +36,6 @@ jobs:
         python -m pip install --upgrade pipenv wheel
 
     - name: Install dependencies
-      if: steps.cache-python-dependencies.outputs.cache-hit != 'true' || steps.cache-local-dependencies.outputs.cache-hit != 'true'
       run: scripts/install-dependencies.sh
 
     - name: Cache assets
