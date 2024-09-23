@@ -36,7 +36,6 @@ import shutil
 import sys
 import tempfile
 import urllib.parse
-import uuid
 
 from enum import Enum
 
@@ -596,10 +595,6 @@ def overlay(library):
     destination_sources_path = os.path.join(data_output_path, "sources.json")
     destination_summary_path = os.path.join(data_output_path, "summary.json")
 
-    api_v1_programs_path = os.path.join(api_v1_output_path, "programs.json")
-    api_v1_sources_path = os.path.join(api_v1_output_path, "sources.json")
-    api_v1_summary_path = os.path.join(api_v1_output_path, "summary.json")
-
     # Import screenshots from the overlay.
     overlay = collections.defaultdict(list)
     for overlay_directory in library.overlay_directories:
@@ -654,12 +649,15 @@ def overlay(library):
     shutil.copytree(icons_path, icons_output_path)
 
     # Copy the API.
-    shutil.copytree(library.index_directory, api_v1_output_path)
+    os.makedirs(api_v1_output_path, exist_ok=True)
+    shutil.copytree(icons_output_path, os.path.join(api_v1_output_path, "icons"))
     shutil.copytree(screenshots_output_path, os.path.join(api_v1_output_path, "screenshots"))
-    shutil.copyfile(destination_sources_path, api_v1_sources_path)
-    shutil.copyfile(destination_summary_path, api_v1_summary_path)
-    shutil.copyfile(destination_programs_path, api_v1_programs_path)
-
+    os.makedirs(os.path.join(api_v1_output_path, "programs"), exist_ok=True)
+    shutil.copyfile(destination_programs_path, os.path.join(api_v1_output_path, "programs", "index.json"))
+    os.makedirs(os.path.join(api_v1_output_path, "sources"), exist_ok=True)
+    shutil.copyfile(destination_sources_path, os.path.join(api_v1_output_path, "sources", "index.json"))
+    os.makedirs(os.path.join(api_v1_output_path, "summary"), exist_ok=True)
+    shutil.copyfile(destination_summary_path, os.path.join(api_v1_output_path, "summary", "index.json"))
 
 def main():
     parser = argparse.ArgumentParser()
