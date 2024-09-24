@@ -47,6 +47,8 @@ import model
 import opolua
 import utils
 
+from PIL import Image as PILImage, ImageOps
+
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
@@ -636,7 +638,13 @@ def overlay(library):
             destination_path = os.path.join(library.output_directory, relative_path)
             logging.info("Copying '%s' to '%s'...", screenshot, destination_path)
             shutil.copyfile(screenshot, destination_path)
-            relative_paths.append(relative_path)
+            with PILImage.open(screenshot) as image:
+                width, height = image.size
+            relative_paths.append({
+                "width": width,
+                "height": height,
+                "path": relative_path,
+            })
         application['screenshots'] = relative_paths
 
     # Write the index.
