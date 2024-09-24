@@ -41,14 +41,13 @@ from enum import Enum
 
 import yaml
 
+from PIL import Image as PILImage, ImageOps
+
 import common
 import containers
 import model
 import opolua
 import utils
-
-from PIL import Image as PILImage, ImageOps
-
 
 TOOLS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIRECTORY = os.path.dirname(TOOLS_DIRECTORY)
