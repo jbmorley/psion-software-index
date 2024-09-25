@@ -7,8 +7,10 @@ verify_ssl = true
 [packages]
 
 jinja2 = "*"
+natsort = "*"
 pillow = "*"
 pycdlib = "*"
+python-frontmatter = "*"
 pyyaml = "*"
 requests = "*"
 tqdm = "*"
