@@ -39,7 +39,8 @@ import urllib.parse
 
 from enum import Enum
 
-import yaml
+import frontmatter
+import natsort
 
 from PIL import Image as PILImage, ImageOps
 
@@ -226,7 +227,8 @@ class Program(object):
         versions = collections.defaultdict(list)
         for installer in installers:
             versions[installer.version].append(installer)
-        self.versions = sorted([Version(installers=installers) for installers in versions.values()], key=lambda x: x.version)
+        # We use `natsort` to sort the versions to ensure, for example, 10.0 sorts _after_ 2.0.
+        self.versions = natsort.natsorted([Version(installers=installers) for installers in versions.values()], key=lambda x: x.version)
         tags = set()
         for installer in installers:
             for tag in installer.tags:
