@@ -598,15 +598,19 @@ def overlay(library):
     destination_sources_path = os.path.join(data_output_path, "sources.json")
     destination_summary_path = os.path.join(data_output_path, "summary.json")
 
-    # Import screenshots from the overlay.
-    overlay = collections.defaultdict(list)
+    # Import screenshots and metadata from the overlay.
+    overlay = collections.defaultdict(dict)
     for overlay_directory in library.overlay_directories:
         for identifier in os.listdir(overlay_directory):
             if identifier.startswith("."):
                 continue
             screenshots_path = os.path.join(overlay_directory, identifier)
-            overlay[identifier] = [os.path.join(screenshots_path, screenshot)
-                                   for screenshot in os.listdir(screenshots_path)]
+            overlay[identifier]["screenshots"] = [os.path.join(screenshots_path, screenshot)
+                                                  for screenshot in os.listdir(screenshots_path)
+                                                  if screenshot.endswith(".png")]
+            overlay_index_path = os.path.join(overlay_directory, "index.md")
+            if os.path.exists(overlay_index_path):
+                overlay[identifier]["index"] = frontmatter.load(overlay_index_path)
 
     # Load the index.
     with open(source_programs_path) as fh:
@@ -626,12 +630,12 @@ def overlay(library):
     os.makedirs(data_output_path, exist_ok=True)
     os.makedirs(screenshots_output_path, exist_ok=True)
 
-    # Merge the screenshots into the overlay.
+    # Merge the overlay into the index.
     for application in index:
         identifier = application['uid']
         if identifier not in overlay:
             continue
-        screenshots = overlay[identifier]
+        screenshots = overlay[identifier]["screenshots"] if "screenshots" in overlay[identifier] else []
         os.makedirs(os.path.join(screenshots_output_path, identifier))
         relative_paths = []
         for screenshot in screenshots:
