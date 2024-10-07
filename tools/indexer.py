@@ -468,7 +468,7 @@ def import_source(source, reference=None, path=None, indent=0):
         if basename in IGNORED or "System/Install" in file_path:
             continue
 
-        if ext == ".app":
+        if ext == ".app" or ext == ".opa":
 
             # TODO: Combine APP and SIS.
 
