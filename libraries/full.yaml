@@ -31,6 +31,11 @@ sources:
 - https://archive.org/download/tucows_321799_Dighandler/DH813.zip
 - https://archive.org/download/tucows_322115_Speaker/Speaker.zip
 - https://archive.org/download/tucows_325813_Pebbles_on_the_move/Pebbles.zip
+- https://archive.org/download/wpc-0296/wpc-0296.iso
+- https://archive.org/download/wpc-0396/wpc-0396.iso
+- https://archive.org/download/wpc-0696/wpc-0696.iso
+- https://archive.org/download/wpc-0996/wpc-0996.iso
+- https://archive.org/download/wpc-1296/wpc-1296.iso
 
 overlays:
 - ../overlays

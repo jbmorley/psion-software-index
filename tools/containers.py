@@ -38,7 +38,12 @@ def extract_iso(path, destination_path):
     iso = pycdlib.PyCdlib()
     iso.open(path)
 
-    pathname = 'joliet_path'
+    pathname = 'iso_path'
+    if iso.has_udf():
+        pathname = 'udf_path'
+    elif iso.has_joliet():
+        pathname = 'joliet_path'
+
     start_path = '/'
     root_entry = iso.get_record(**{pathname: start_path})
 
