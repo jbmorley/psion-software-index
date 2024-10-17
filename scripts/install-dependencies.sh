@@ -41,11 +41,11 @@ source "$ENVIRONMENT_PATH"
 PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
 
 # Install the Ruby dependencies
-gem install bundler
-cd "$SITE_DIRECTORY"
-bundle install
+# gem install bundler
+# cd "$SITE_DIRECTORY"
+# bundle install
 
 # Install Internet Archive tools
-mkdir -p "$BIN_DIRECTORY"
-curl -L https://archive.org/download/ia-pex/ia -o "$BIN_DIRECTORY/ia"
-chmod +x "$BIN_DIRECTORY/ia"
+# mkdir -p "$BIN_DIRECTORY"
+# curl -L https://archive.org/download/ia-pex/ia -o "$BIN_DIRECTORY/ia"
+# chmod +x "$BIN_DIRECTORY/ia"
