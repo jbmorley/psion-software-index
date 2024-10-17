@@ -27,7 +27,7 @@ jobs:
       run: scripts/install-dependencies.sh
 
     - name: Build the index
-      run: tools/indexer libraries/full.yaml sync build overlay
+      run: tools/indexer libraries/full.yaml sync index overlay
 
     - name: Build site
       run: |
