@@ -17,12 +17,15 @@ def main():
         fh.write("\n")
     os.chmod(key_file, 0o400)
     try:
-        subprocess.check_call(["ansible-playbook",
-                               "-vvvv",
-                               "-i", "hosts",
-                               "index.yml",
-                               "--extra-vars", f"root={FILES_DIRECTORY}",
-                               "--extra-vars", f"ansible_ssh_private_key_file={key_file}"])
+        subprocess.check_call([
+            "ansible-playbook",
+            "-vvvv",
+            "-i", "hosts",
+            "index.yml",
+            "--extra-vars", f"root={FILES_DIRECTORY}",
+            "--extra-vars", f"ansible_ssh_private_key_file={key_file}",
+            "--extra-vars", "ansible_become_pass='{{ lookup(\"env\", \"ANSIBLE_BECOME_PASS\") }}'",
+       ])
     finally:
         os.remove(key_file)
 

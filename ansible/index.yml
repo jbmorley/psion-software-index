@@ -11,6 +11,10 @@
       file:
         path: "{{ destination }}"
         state: directory
+        owner: www-data
+        group: www-data
+        mode: 0775
+      become: yes
 
     - name: Synchronize contents
       synchronize:

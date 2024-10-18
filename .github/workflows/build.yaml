@@ -42,5 +42,6 @@ jobs:
       # if: github.ref == 'refs/heads/main'
       env:
         ANSIBLE_SSH_KEY: ${{ secrets.ANSIBLE_SSH_KEY }}
+        ANSIBLE_BECOME_PASS: ${{ secrets.ANSIBLE_BECOME_PASS }}
       run: |
         ansible/deploy.py
