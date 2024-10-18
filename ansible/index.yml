@@ -3,7 +3,7 @@
 #   The local site root / build directory must be specified on the command line using --extra-vars "root=".
 #
 - name: software.psion.info
-  hosts: jbmorley
+  hosts: production
 
   tasks:
 
