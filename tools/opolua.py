@@ -46,7 +46,8 @@ NOT_AN_AI_MESSAGE = "Not an AIF file"
 try:
     LUA_PATH = os.environ["LUA_PATH"]
 except KeyError:
-    LUA_PATH = "lua"
+    # By default we respect the default version of lua specified in .tool-versions.
+    LUA_PATH = subprocess.check_output(["mise", "which", "lua", "--cd", OPOLUA_DIRECTORY]).decode("utf-8").strip()
 
 
 class InvalidInstaller(Exception):

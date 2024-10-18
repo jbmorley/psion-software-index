@@ -55,6 +55,9 @@ class Library(object):
         self.overlay_directories = [os.path.join(root_directory, overlay_directory)
                                     for overlay_directory in self._configuration['overlays']]
         self.assets_directory = os.path.normpath(os.path.join(root_directory, self._configuration['assets_directory']))
+        if "INDEXER_ASSETS_DIRECTORY" in os.environ:
+            self.assets_directory = os.environ["INDEXER_ASSETS_DIRECTORY"]
+            logging.warning("Using $INDEXER_ASSETS_DIRECTORY environment variable (%s)", self.assets_directory)
         self.index_directory = os.path.normpath(os.path.join(root_directory, self._configuration['index_directory']))
         self.output_directory = os.path.normpath(os.path.join(root_directory, self._configuration['output_directory']))
         self.sources = [InternetArchiveSource(self.assets_directory, url)
@@ -107,16 +110,29 @@ class InternetArchiveSource(object):
     def sync(self):
         logging.info("Syncing '%s'...", self.id)
         os.makedirs(self.item_directory, exist_ok=True)
+
+        # This implementation fails-over to downloading from our mirror https://psion.solarcene.community if we get a
+        # 503 or a timeout from the Internet Archive.
+
         if not os.path.exists(self.item_metadata_path):
-            utils.download_file(f"https://archive.org/download/{self.id}/{self.id}_meta.xml", self.item_metadata_path)
+            utils.download_file_with_mirrors([
+                f"https://archive.org/download/{self.id}/{self.id}_meta.xml",
+                f"https://psion.solarcene.community/{self.id}/{self.id}_meta.xml",
+            ], self.item_metadata_path)
         if not os.path.exists(self.file_metadata_path):
-            utils.download_file(f"https://archive.org/download/{self.id}/{self.id}_files.xml", self.file_metadata_path)
+            utils.download_file_with_mirrors([
+                f"https://archive.org/download/{self.id}/{self.id}_files.xml",
+                f"https://psion.solarcene.community/{self.id}/{self.id}_files.xml",
+            ], self.file_metadata_path)
         # TODO: Check the shas.
         if not os.path.exists(self.path):
             destination_directory = os.path.dirname(self.path)
             logging.info(destination_directory)
             os.makedirs(destination_directory, exist_ok=True)
-            utils.download_file(self.url, self.path)
+            utils.download_file_with_mirrors([
+                self.url,
+                f"https://psion.solarcene.community/{self.id}/{self.relative_path}",
+            ], self.path)
 
     @property
     def metadata(self):

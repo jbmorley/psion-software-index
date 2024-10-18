@@ -32,20 +32,25 @@ TOOLS_DIRECTORY="$ROOT_DIRECTORY/tools"
 SITE_DIRECTORY="$ROOT_DIRECTORY/site"
 ENVIRONMENT_PATH="$SCRIPTS_DIRECTORY/environment.sh"
 
+# Install tools.
+cd "$ROOT_DIRECTORY"
+mise install
+cd "$ROOT_DIRECTORY/dependencies/opolua"
+mise install
+
+# Create directory for local tools.
 if [ -d "$ROOT_DIRECTORY/.local" ] ; then
     rm -r "$ROOT_DIRECTORY/.local"
 fi
+
+# Source the local environment configuration; this ensures tools are installed in the .local directory we just created.
 source "$ENVIRONMENT_PATH"
 
 # Install the Python dependencies
+pip3 install pipenv
 PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
 
 # Install the Ruby dependencies
 gem install bundler
 cd "$SITE_DIRECTORY"
 bundle install
-
-# Install Internet Archive tools
-mkdir -p "$BIN_DIRECTORY"
-curl -L https://archive.org/download/ia-pex/ia -o "$BIN_DIRECTORY/ia"
-chmod +x "$BIN_DIRECTORY/ia"

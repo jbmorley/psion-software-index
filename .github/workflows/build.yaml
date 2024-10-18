@@ -13,7 +13,7 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted-macos-latest
 
     steps:
 
@@ -23,44 +23,15 @@ jobs:
         submodules: recursive
         lfs: true
 
-    - name: Install Lua
-      uses: leafo/gh-actions-lua@v10
-
-    - name: Install Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-
-    - name: Install pipenv
-      run: |
-        python -m pip install --upgrade pipenv wheel
-
     - name: Install dependencies
       run: scripts/install-dependencies.sh
 
-    - name: Cache assets
-      uses: actions/cache@v4
-      id: cache-assets
-      with:
-        path: _assets
-        key: ${{ runner.os }}-${{ hashFiles('libraries/full.yaml') }}
-
-    - name: Download assets
-      run: tools/indexer libraries/full.yaml sync
-
-    - name: Cache index
-      uses: actions/cache@v4
-      id: cache-index
-      with:
-        path: _index
-        key: ${{ runner.os }}-${{ hashFiles('libraries/full.yaml') }}-${{ hashFiles('tools/*') }}
-
-    - name: Build index
-      if: steps.cache-index.outputs.cache-hit != 'true'
-      run: tools/indexer libraries/full.yaml index
-
-    - name: Build overlay
-      run: tools/indexer libraries/full.yaml overlay
+    - name: Build the index
+      env:
+        INDEXER_ASSETS_DIRECTORY: /Users/jbmorley/psion-software-index/assets
+      run: |
+        mkdir -p "$INDEXER_ASSETS_DIRECTORY"
+        tools/indexer libraries/full.yaml sync index overlay
 
     - name: Build site
       run: |
