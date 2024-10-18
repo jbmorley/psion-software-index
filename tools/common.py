@@ -55,6 +55,9 @@ class Library(object):
         self.overlay_directories = [os.path.join(root_directory, overlay_directory)
                                     for overlay_directory in self._configuration['overlays']]
         self.assets_directory = os.path.normpath(os.path.join(root_directory, self._configuration['assets_directory']))
+        if "INDEXER_ASSETS_DIRECTORY" in os.environ:
+            self.assets_directory = os.environ["INDEXER_ASSETS_DIRECTORY"]
+            logging.warning("Using $INDEXER_ASSETS_DIRECTORY environment variable (%s)", self.assets_directory)
         self.index_directory = os.path.normpath(os.path.join(root_directory, self._configuration['index_directory']))
         self.output_directory = os.path.normpath(os.path.join(root_directory, self._configuration['output_directory']))
         self.sources = [InternetArchiveSource(self.assets_directory, url)

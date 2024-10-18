@@ -27,7 +27,11 @@ jobs:
       run: scripts/install-dependencies.sh
 
     - name: Build the index
-      run: tools/indexer libraries/full.yaml sync index overlay
+      env:
+        INDEXER_ASSETS_DIRECTORY: /Users/jbmorley/psion-software-index/assets
+      run: |
+        mkdir -p "$INDEXER_ASSETS_DIRECTORY"
+        tools/indexer libraries/full.yaml sync index overlay
 
     - name: Build site
       run: |
