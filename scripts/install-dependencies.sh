@@ -55,8 +55,3 @@ PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
 # gem install bundler
 # cd "$SITE_DIRECTORY"
 # bundle install
-
-# Install Internet Archive tools
-# mkdir -p "$BIN_DIRECTORY"
-# curl -L https://archive.org/download/ia-pex/ia -o "$BIN_DIRECTORY/ia"
-# chmod +x "$BIN_DIRECTORY/ia"
