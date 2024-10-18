@@ -46,7 +46,7 @@ NOT_AN_AI_MESSAGE = "Not an AIF file"
 try:
     LUA_PATH = os.environ["LUA_PATH"]
 except KeyError:
-    LUA_PATH = "lua"
+    LUA_PATH = shutil.which("lua")
 
 
 class InvalidInstaller(Exception):
