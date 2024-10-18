@@ -1,0 +1,21 @@
+---
+# Usage:
+#   The local site root / build directory must be specified on the command line using --extra-vars "root=".
+#
+- name: software.psion.info
+  hosts: jbmorley
+
+  tasks:
+
+    - name: Create destination directory
+      file:
+        path: "{{ destination }}"
+        state: directory
+
+    - name: Synchronize contents
+      synchronize:
+        src: "{{ root }}/"
+        dest: "{{ destination }}/"
+        rsync_opts:
+          - "--delete-during"
+          - "-v"

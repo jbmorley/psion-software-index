@@ -8,34 +8,34 @@ sources:
 # - https://archive.org/download/czchip200308cd/Chip_2003-08_cd2.bin
 # - https://archive.org/download/mame-sl/mame-sl/psion_ssd.zip
 
-- https://archive.org/download/3-libjune-05/3LIBJUNE05.iso
-- https://archive.org/download/diamond_mako/Mako.iso
-- https://archive.org/download/enrouteeurope/EnRouteEurope_Contents.zip
-- https://archive.org/download/NWTPsion3/NWT_Psion3.tar
-- https://archive.org/download/pilowar/pilowar.iso
-- https://archive.org/download/pocketwarewoerterbuch/PocketWareTrueDic.iso
-- https://archive.org/download/psion-cdtextfiles.com/PSION_cdtextfiles.com.zip
-- https://archive.org/download/psioncdvol1/PsionCDVol1.iso
-- https://archive.org/download/psioncdvol2/PsionCDVol2.iso
-- https://archive.org/download/streetplanner99/StreetPlanner99_Contents.zip
-- https://archive.org/download/tucows_6844_Golf_Pro_Enhanced/mx-golfp.zip
-- https://archive.org/download/tucows_31661_PsiBlocks/psiblock.zip
-- https://archive.org/download/tucows_165646_Lingo/lingo20.zip
-- https://archive.org/download/tucows_171771_AgnPrint/AgnPrint.zip
+# - https://archive.org/download/3-libjune-05/3LIBJUNE05.iso
+# - https://archive.org/download/diamond_mako/Mako.iso
+# - https://archive.org/download/enrouteeurope/EnRouteEurope_Contents.zip
+# - https://archive.org/download/NWTPsion3/NWT_Psion3.tar
+# - https://archive.org/download/pilowar/pilowar.iso
+# - https://archive.org/download/pocketwarewoerterbuch/PocketWareTrueDic.iso
+# - https://archive.org/download/psion-cdtextfiles.com/PSION_cdtextfiles.com.zip
+# - https://archive.org/download/psioncdvol1/PsionCDVol1.iso
+# - https://archive.org/download/psioncdvol2/PsionCDVol2.iso
+# - https://archive.org/download/streetplanner99/StreetPlanner99_Contents.zip
+# - https://archive.org/download/tucows_6844_Golf_Pro_Enhanced/mx-golfp.zip
+# - https://archive.org/download/tucows_31661_PsiBlocks/psiblock.zip
+# - https://archive.org/download/tucows_165646_Lingo/lingo20.zip
+# - https://archive.org/download/tucows_171771_AgnPrint/AgnPrint.zip
 - https://archive.org/download/tucows_228843_Alignment/alignment.zip
-- https://archive.org/download/tucows_260548_DXFV/dxfv.zip
-- https://archive.org/download/tucows_296952_EPOC_Network_Utilities/netutils.zip
-- https://archive.org/download/tucows_296954_EPOC_FTPServer/ftpserver.zip
-- https://archive.org/download/tucows_308303_Emu48E/Emu48E_v14.zip
-- https://archive.org/download/tucows_315698_PsiMIDI/PsiMIDI.zip
-- https://archive.org/download/tucows_321799_Dighandler/DH813.zip
-- https://archive.org/download/tucows_322115_Speaker/Speaker.zip
-- https://archive.org/download/tucows_325813_Pebbles_on_the_move/Pebbles.zip
-- https://archive.org/download/wpc-0296/wpc-0296.iso
-- https://archive.org/download/wpc-0396/wpc-0396.iso
-- https://archive.org/download/wpc-0696/wpc-0696.iso
-- https://archive.org/download/wpc-0996/wpc-0996.iso
-- https://archive.org/download/wpc-1296/wpc-1296.iso
+# - https://archive.org/download/tucows_260548_DXFV/dxfv.zip
+# - https://archive.org/download/tucows_296952_EPOC_Network_Utilities/netutils.zip
+# - https://archive.org/download/tucows_296954_EPOC_FTPServer/ftpserver.zip
+# - https://archive.org/download/tucows_308303_Emu48E/Emu48E_v14.zip
+# - https://archive.org/download/tucows_315698_PsiMIDI/PsiMIDI.zip
+# - https://archive.org/download/tucows_321799_Dighandler/DH813.zip
+# - https://archive.org/download/tucows_322115_Speaker/Speaker.zip
+# - https://archive.org/download/tucows_325813_Pebbles_on_the_move/Pebbles.zip
+# - https://archive.org/download/wpc-0296/wpc-0296.iso
+# - https://archive.org/download/wpc-0396/wpc-0396.iso
+# - https://archive.org/download/wpc-0696/wpc-0696.iso
+# - https://archive.org/download/wpc-0996/wpc-0996.iso
+# - https://archive.org/download/wpc-1296/wpc-1296.iso
 
 overlays:
 - ../overlays
