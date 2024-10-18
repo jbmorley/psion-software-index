@@ -27,6 +27,22 @@ import requests
 from tqdm import tqdm
 
 
+def download_file_with_mirrors(urls, local_filename=None):
+    urls = list(urls)
+    while True:
+        url = urls.pop(0)
+        try:
+            return download_file(url, local_filename)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code != 503 or len(urls) < 1:
+                raise
+            continue
+        except requests.exceptions.ConnectTimeout:
+            if len(urls) < 1:
+                raise
+            continue
+
+
 def download_file(url, local_filename=None):
     # TODO: Download to a temporary location.
     logging.info("Downloading '%s'...", url)

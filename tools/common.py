@@ -26,7 +26,6 @@ import os
 from urllib.parse import quote_plus
 from urllib.parse import urlparse
 
-import requests
 import yaml
 
 import xml.etree.ElementTree as ET
@@ -110,37 +109,27 @@ class InternetArchiveSource(object):
         os.makedirs(self.item_directory, exist_ok=True)
 
         # This implementation fails-over to downloading from our mirror https://psion.solarcene.community if we get a
-        # 503 from the Internet Archive.
+        # 503 or a timeout from the Internet Archive.
 
         if not os.path.exists(self.item_metadata_path):
-            try:
-                utils.download_file(f"https://archive.org/download/{self.id}/{self.id}_meta.xml",
-                                    self.item_metadata_path)
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code != 503:
-                    raise
-                utils.download_file(f"https://psion.solarcene.community/{self.id}/{self.id}_meta.xml",
-                                    self.item_metadata_path)
+            utils.download_file_with_mirrors([
+                f"https://archive.org/download/{self.id}/{self.id}_meta.xml",
+                f"https://psion.solarcene.community/{self.id}/{self.id}_meta.xml",
+            ], self.item_metadata_path)
         if not os.path.exists(self.file_metadata_path):
-            try:
-                utils.download_file(f"https://archive.org/download/{self.id}/{self.id}_files.xml",
-                                    self.file_metadata_path)
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code != 503:
-                    raise
-                utils.download_file(f"https://psion.solarcene.community/{self.id}/{self.id}_files.xml",
-                                    self.file_metadata_path)
+            utils.download_file_with_mirrors([
+                f"https://archive.org/download/{self.id}/{self.id}_files.xml",
+                f"https://psion.solarcene.community/{self.id}/{self.id}_files.xml",
+            ], self.file_metadata_path)
         # TODO: Check the shas.
         if not os.path.exists(self.path):
             destination_directory = os.path.dirname(self.path)
             logging.info(destination_directory)
             os.makedirs(destination_directory, exist_ok=True)
-            try:
-                utils.download_file(self.url, self.path)
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code != 503:
-                    raise
-                utils.download_file(f"https://psion.solarcene.community/{self.id}/{self.relative_path}")
+            utils.download_file_with_mirrors([
+                self.url,
+                f"https://psion.solarcene.community/{self.id}/{self.relative_path}",
+            ], self.path)
 
     @property
     def metadata(self):
