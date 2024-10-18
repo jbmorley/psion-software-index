@@ -47,7 +47,6 @@ fi
 source "$ENVIRONMENT_PATH"
 
 # Install the Python dependencies
-which pip3
 pip3 install pipenv
 PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
 
