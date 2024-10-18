@@ -52,6 +52,6 @@ pip3 install pipenv
 PIPENV_PIPFILE="$TOOLS_DIRECTORY/Pipfile" pipenv install
 
 # Install the Ruby dependencies
-# gem install bundler
-# cd "$SITE_DIRECTORY"
-# bundle install
+gem install bundler
+cd "$SITE_DIRECTORY"
+bundle install
