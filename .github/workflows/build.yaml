@@ -43,5 +43,4 @@ jobs:
       env:
         ANSIBLE_SSH_KEY: ${{ secrets.ANSIBLE_SSH_KEY }}
       run: |
-        cd site
         ansible/deploy.py
