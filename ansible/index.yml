@@ -20,6 +20,8 @@
       synchronize:
         src: "{{ root }}/"
         dest: "{{ destination }}/"
+        owner: false
+        group: false
         rsync_opts:
           - "--delete-during"
           - "-v"
