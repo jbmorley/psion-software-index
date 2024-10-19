@@ -1,0 +1,43 @@
+---
+# Usage:
+#   The local site root / build directory must be specified on the command line using --extra-vars "root=".
+#
+- name: software.psion.info
+  hosts: production
+
+  tasks:
+
+    - name: Enable site
+      template:
+        src: templates/site.caddy
+        dest: "/etc/caddy/software.psion.info.caddy"
+        owner: root
+        group: root
+      become: yes
+
+    - name: Create destination directory
+      file:
+        path: "/var/www/software.psion.info"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0775
+      become: yes
+
+    - name: Synchronize contents
+      synchronize:
+        src: "{{ root }}/"
+        dest: "/var/www/software.psion.info/"
+        owner: false
+        group: false
+        perms: false
+        times: false
+        rsync_opts:
+          - "--delete-during"
+          - "-v"
+
+    - name: Reload Caddy
+      service:
+        name: caddy
+        state: reloaded
+      become: yes
