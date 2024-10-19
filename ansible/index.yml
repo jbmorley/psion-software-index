@@ -17,7 +17,7 @@
 
     - name: Create destination directory
       file:
-        path: "{{ destination }}"
+        path: "/var/www/software.psion.info"
         state: directory
         owner: www-data
         group: www-data
@@ -27,7 +27,7 @@
     - name: Synchronize contents
       synchronize:
         src: "{{ root }}/"
-        dest: "{{ destination }}/"
+        dest: "/var/www/software.psion.info/"
         owner: false
         group: false
         perms: false
