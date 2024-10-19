@@ -1,0 +1,7 @@
+software.psion.info {
+        root * /var/www/software.psion.info
+	encode zstd gzip
+        file_server {
+		    index index.html index.json
+	}
+}

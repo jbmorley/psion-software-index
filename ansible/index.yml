@@ -7,6 +7,14 @@
 
   tasks:
 
+    - name: Enable site
+      template:
+        src: templates/site.caddy
+        dest: "/etc/caddy/software.psion.info.caddy"
+        owner: root
+        group: root
+      become: yes
+
     - name: Create destination directory
       file:
         path: "{{ destination }}"
@@ -27,3 +35,9 @@
         rsync_opts:
           - "--delete-during"
           - "-v"
+
+    - name: Reload Caddy
+      service:
+        name: caddy
+        state: reloaded
+      become: yes
