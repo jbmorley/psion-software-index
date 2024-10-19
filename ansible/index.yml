@@ -23,7 +23,7 @@
         owner: false
         group: false
         perms: false
+        times: false
         rsync_opts:
           - "--delete-during"
           - "-v"
-          - "--omit-dir-times"
