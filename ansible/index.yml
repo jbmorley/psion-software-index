@@ -22,6 +22,7 @@
         dest: "{{ destination }}/"
         owner: false
         group: false
+        perms: false
         rsync_opts:
           - "--delete-during"
           - "-v"
