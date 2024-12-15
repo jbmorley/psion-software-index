@@ -78,32 +78,6 @@ IGNORED = set([
     "PsiStatsPro.sis",
 ])
 
-LANGUAGE_EMOJI = {
-    "en_GB": "🇬🇧",
-    "de_DE": "🇩🇪",
-    "en_US": "🇺🇸",
-    "en_AU": "🇦🇺",
-    "fr_FR": "🇫🇷",
-    "it_IT": "🇮🇹",
-    "nl_NL": "🇳🇱",
-    "es_ES": "🇪🇸",
-    "cs_CZ": "🇨🇿",
-    "bg_BG": "🇧🇬",
-    "hu_HU": "🇭🇺",
-    "pl_PL": "🇵🇱",
-    "ru_RU": "🇷🇺",
-    "no_NO": "🇳🇴",
-    "sv_SE": "🇸🇪",
-    "da_DK": "🇩🇰",
-    "en_NZ": "🇳🇿",
-    "de_CH": "🇨🇭",
-    "fi_FI": "🇫🇮",
-    "fr_BE": "🇧🇪",
-    "nl_BE": "🇧🇪",
-    "fr_CH": "🇨🇭",
-    "pt_PT": "🇵🇹",
-}
-
 LIBRARY_INDEXES = [
     "library/epocgames",
     "library/epocgraphics",
